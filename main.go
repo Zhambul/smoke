@@ -45,8 +45,7 @@ func (h *ShareGroupInlineHandler) Handle(c *bot.Context) *bot.InlineAnswer {
 
 	if err != nil {
 		log.Printf("Couldn't find group by uuid %v\n", c.Inline.Query)
-		a.Title = "Группа не найдена"
-		return a
+		return nil
 	}
 
 	a.Title = g.Name

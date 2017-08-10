@@ -34,7 +34,6 @@ func (s *Smoke) SetComment(botAcc *bot.BotAccount, comment string) {
 	s.SCs[botAcc.ChatId].Comment = comment
 	s.update()
 	go s.notify("*"+botAcc.FirstName+"* - "+comment, botAcc.ChatId)
-
 }
 
 func (s *Smoke) SetAnswer(botAcc *bot.BotAccount, answer string) {
