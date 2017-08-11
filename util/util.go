@@ -12,3 +12,10 @@ func ToBotAccount(domainAcc *domain.Account) *bot.BotAccount {
 		ChatId:    domainAcc.ChatId,
 	}
 }
+
+func ShareButton(group *domain.Group) *bot.Button {
+	return &bot.Button{
+		Text:              "Пригласить",
+		SwitchInlineQuery: group.UUID,
+	}
+}

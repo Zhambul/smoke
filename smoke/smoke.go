@@ -58,6 +58,7 @@ func NewSmoke(g *domain.Group, creatorChatId int, min int) *Smoke {
 		}
 		if acc.ChatId == creatorChatId {
 			s.CreatorSC = sc
+			s.CreatorSC.Answer = "Да"
 		}
 
 		s.SCs[acc.ChatId] = sc
@@ -80,12 +81,22 @@ func (s *Smoke) timeLoop() {
 		s.min--
 		go s.update()
 		s.lock.Unlock()
-		if s.min == 0 {
-			go s.notifyAll("Группа *"+s.group.Name+"* выходит", 0)
-			break
-		}
 		if s.min == 5 {
-			go s.notifyAll("Группа *"+s.group.Name+"* выходит через 5 минут", 0)
+			if s.goingSmokers() > 1 {
+				go s.notifyAll("Группа *"+s.group.Name+"* выходит через 5 минут", 0)
+			}
+		}
+		if s.min == 0 {
+			if s.goingSmokers() > 1 {
+				go s.notifyAll("Группа *"+s.group.Name+"* выходит", 0)
+				go func() {
+					time.Sleep(10 * time.Minute)
+					s.Cancel()
+				}()
+			} else {
+				s.Cancel()
+			}
+			break
 		}
 	}
 }
@@ -94,7 +105,13 @@ func (s *Smoke) notifyOne(msg string, smokerContext *SmokerContext) {
 	if s.cancelled {
 		return
 	}
-
+	for _, sc := range s.SCs {
+		if sc.Account.ChatId == smokerContext.Account.ChatId {
+			if sc.Answer != "Да" {
+				return
+			}
+		}
+	}
 	r := &bot.Response{
 		Text: msg,
 	}
@@ -104,9 +121,19 @@ func (s *Smoke) notifyOne(msg string, smokerContext *SmokerContext) {
 	smokerContext.Context.DeleteResponse(r)
 }
 
+func (s *Smoke) goingSmokers() int {
+	goingSmokers := 0
+	for _, smokerContext := range s.SCs {
+		if smokerContext.Answer == "Дa" {
+			goingSmokers++
+		}
+	}
+	return goingSmokers
+}
+
 func (s *Smoke) notifyAll(msg string, omitChatId int) {
 	for _, smokerContext := range s.SCs {
-		if smokerContext.Account.ChatId == omitChatId {
+		if smokerContext.Account.ChatId == omitChatId && smokerContext.Answer == "Да" {
 			continue
 		}
 		go s.notifyOne(msg, smokerContext)
@@ -116,7 +143,9 @@ func (s *Smoke) notifyAll(msg string, omitChatId int) {
 func (s *Smoke) Cancel() {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-
+	if s.cancelled {
+		return
+	}
 	s.cancelled = true
 
 	for _, smokerContext := range s.SCs {
@@ -151,7 +180,7 @@ func (s *Smoke) update() {
 	s.updateWithNotify("", 0)
 }
 
-func (s *Smoke) updateWithNotify(msg string, chatId int) {
+func (s *Smoke) updateWithNotify(msg string, omitChatId int) {
 	if s.cancelled {
 		return
 	}
@@ -161,7 +190,7 @@ func (s *Smoke) updateWithNotify(msg string, chatId int) {
 		r.Text = s.format()
 		go smokerContext.Context.SendReply(r)
 		if msg != "" {
-			if smokerContext.Account.ChatId != chatId {
+			if smokerContext.Account.ChatId != omitChatId {
 				go s.notifyOne(msg, smokerContext)
 			}
 		}

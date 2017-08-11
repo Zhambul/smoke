@@ -5,6 +5,7 @@ import (
 	"smoke3/db"
 	"smoke3/domain"
 	"log"
+	"smoke3/util"
 )
 
 type GroupsHandler struct {
@@ -58,10 +59,7 @@ func (h *GiveGroupNameHandler) Handle(c *bot.Context) *bot.Response {
 		Text: "Группа *" + groupName + "* создана",
 	}
 
-	r.AddButton(&bot.Button{
-		Text:              "Поделиться",
-		SwitchInlineQuery: g.UUID,
-	})
+	r.AddButton(util.ShareButton(g))
 	r.AddButtonString("Назад", &MenuHandler{})
 	log.Printf("GiveGroupNameHandler END + %+v\n", r)
 	return r
@@ -85,10 +83,7 @@ func (h *OneGroupHandler) Handle(c *bot.Context) *bot.Response {
 	}
 	r.Text = res
 
-	r.AddButton(&bot.Button{
-		Text:              "Поделиться",
-		SwitchInlineQuery: h.group.UUID,
-	})
+	r.AddButton(util.ShareButton(h.group))
 
 	if h.group.CreatorAccount.ChatId != c.BotAccount.ChatId {
 		r.AddButtonString("Покинуть", &LeaveGroupHandle{h.group})

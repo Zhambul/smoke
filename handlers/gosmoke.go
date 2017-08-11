@@ -6,6 +6,7 @@ import (
 	"bot/bot"
 	"strconv"
 	"smoke3/smoke"
+	"smoke3/util"
 )
 
 type GoSmokeHandler struct {
@@ -41,6 +42,15 @@ type ChooseTimeHandler struct {
 }
 
 func (h *ChooseTimeHandler) Handle(c *bot.Context) *bot.Response {
+	if len(h.group.Accounts) < 2 {
+		r := c.CurrentResponse
+		r.Text = "В группе *" + h.group.Name + "* кроме вас никого"
+		r.ClearButtons()
+		r.AddButton(util.ShareButton(h.group))
+		r.AddButtonString("Удалить", &DeleteGroupHandler{group: h.group})
+		return r
+	}
+
 	r := c.CurrentResponse
 	r.Text = "Через сколько минут?"
 	r.ClearButtons()
