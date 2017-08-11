@@ -6,7 +6,6 @@ import (
 	"bot/bot"
 	"strconv"
 	"smoke3/smoke"
-	"log"
 )
 
 type GoSmokeHandler struct {
@@ -32,6 +31,7 @@ func (t *GoSmokeHandler) Handle(c *bot.Context) *bot.Response {
 	for _, g := range groups {
 		r.AddButtonString(g.Name, &ChooseTimeHandler{g})
 	}
+	r.AddButtonString("Назад", &StartHandler{})
 
 	return r
 }
@@ -45,7 +45,7 @@ func (h *ChooseTimeHandler) Handle(c *bot.Context) *bot.Response {
 	r.Text = "Через сколько минут?"
 	r.ClearButtons()
 	r.AddButtonRow(h.goSmokeButton(5), h.goSmokeButton(10), h.goSmokeButton(15))
-	r.AddButtonRow(h.goSmokeButton(20), h.goSmokeButton(25), h.goSmokeButton(30))
+	r.AddButtonRow(h.goSmokeButton(20), h.goSmokeButton(30), h.goSmokeButton(40))
 	return r
 }
 
@@ -96,7 +96,6 @@ type ReplyHandler struct {
 }
 
 func (h *ReplyHandler) Handle(c *bot.Context) *bot.Response {
-	log.Println("Replied")
 	h.Smoke.SetComment(c.BotAccount, c.Message.Text)
 	return nil
 }

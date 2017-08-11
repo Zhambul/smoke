@@ -3,7 +3,6 @@ package main
 import (
 	"smoke3/handlers"
 	"smoke3/db"
-
 	"bot/bot"
 	"strings"
 	"log"
@@ -18,9 +17,10 @@ func main() {
 
 	bot.Init(os.Getenv("TOKEN"))
 
-	bot.RegisterDefaultHandler(&bot.SimpleMatcher{"/start"}, &handlers.StartHandler{})
-	bot.RegisterDefaultHandler(&bot.SimpleMatcher{"/go"}, &handlers.GoSmokeHandler{})
-	bot.RegisterDefaultHandler(&StartMatcher{}, &handlers.StartJoinGroupHandler{})
+	bot.RegisterHandler("/start", &handlers.StartHandler{})
+	bot.RegisterHandler("/go", &handlers.GoSmokeHandler{})
+
+	bot.RegisterMatchedHandler(&StartMatcher{}, &handlers.StartJoinGroupHandler{})
 
 	bot.RegisterInlineHandler(&ShareGroupInlineHandler{})
 

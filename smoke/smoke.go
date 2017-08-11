@@ -29,11 +29,9 @@ type Smoke struct {
 
 func (s *Smoke) SetComment(botAcc *bot.BotAccount, comment string) {
 	s.lock.Lock()
-	defer s.lock.Unlock()
-	log.Printf("setting comment - %v\n", comment)
 	s.SCs[botAcc.ChatId].Comment = comment
-	s.update()
-	go s.notify("*"+botAcc.FirstName+"* - "+comment, botAcc.ChatId)
+	s.lock.Unlock()
+	go s.updateWithNotify("*"+botAcc.FirstName+"* - "+comment, botAcc.ChatId)
 }
 
 func (s *Smoke) SetAnswer(botAcc *bot.BotAccount, answer string) {
@@ -41,8 +39,7 @@ func (s *Smoke) SetAnswer(botAcc *bot.BotAccount, answer string) {
 	defer s.lock.Unlock()
 	if s.SCs[botAcc.ChatId].Answer != answer {
 		s.SCs[botAcc.ChatId].Answer = answer
-		s.update()
-		go s.notify("*"+botAcc.FirstName+"* - "+answer, botAcc.ChatId)
+		go s.updateWithNotify("*"+botAcc.FirstName+"* - "+answer, botAcc.ChatId)
 	}
 }
 
@@ -54,28 +51,23 @@ func NewSmoke(g *domain.Group, creatorChatId int, min int) *Smoke {
 	}
 
 	for _, acc := range g.Accounts {
-		r := &bot.Response{}
 		sc := &SmokerContext{
 			Account:      acc,
-			Context:      bot.RegisterContext(util.ToBotAccount(acc)),
-			PostResponse: r,
+			Context:      bot.GetContext(util.ToBotAccount(acc)),
+			PostResponse: &bot.Response{},
 		}
 		if acc.ChatId == creatorChatId {
 			s.CreatorSC = sc
-			sc.Answer = "Да"
-		} else {
-			sc.Answer = "Нет"
 		}
 
 		s.SCs[acc.ChatId] = sc
 	}
+
 	return s
 }
 
 func (s *Smoke) Start() {
-	s.lock.Lock()
-	s.update()
-	s.lock.Unlock()
+	go s.update()
 	go s.timeLoop()
 }
 
@@ -86,37 +78,38 @@ func (s *Smoke) timeLoop() {
 		log.Println("decrementing min")
 		s.lock.Lock()
 		s.min--
-		s.update()
+		go s.update()
 		s.lock.Unlock()
 		if s.min == 0 {
+			go s.notifyAll("Группа *"+s.group.Name+"* выходит", 0)
 			break
 		}
 		if s.min == 5 {
-			go s.notify("Через 5 минут выходить", 0)
+			go s.notifyAll("Группа *"+s.group.Name+"* выходит через 5 минут", 0)
 		}
 	}
 }
 
-func (s *Smoke) notify(msg string, omitChatId int) {
-	log.Printf("Notify called to %v contexts\n", len(s.SCs))
-	s.lock.Lock()
+func (s *Smoke) notifyOne(msg string, smokerContext *SmokerContext) {
 	if s.cancelled {
 		return
 	}
-	s.lock.Unlock()
+
+	r := &bot.Response{
+		Text: msg,
+	}
+
+	smokerContext.Context.SendReply(r)
+	time.Sleep(5 * time.Second)
+	smokerContext.Context.DeleteResponse(r)
+}
+
+func (s *Smoke) notifyAll(msg string, omitChatId int) {
 	for _, smokerContext := range s.SCs {
 		if smokerContext.Account.ChatId == omitChatId {
 			continue
 		}
-		r := &bot.Response{
-			Text: msg,
-		}
-		log.Println("Notify!!!!")
-
-		smokerContext.Context.SendReply(r)
-		time.Sleep(5 * time.Second)
-
-		smokerContext.Context.DeleteResponse(r)
+		go s.notifyOne(msg, smokerContext)
 	}
 }
 
@@ -155,6 +148,10 @@ func (s *Smoke) format() string {
 }
 
 func (s *Smoke) update() {
+	s.updateWithNotify("", 0)
+}
+
+func (s *Smoke) updateWithNotify(msg string, chatId int) {
 	if s.cancelled {
 		return
 	}
@@ -162,12 +159,11 @@ func (s *Smoke) update() {
 	for _, smokerContext := range s.SCs {
 		r := smokerContext.PostResponse
 		r.Text = s.format()
-		/*
-		{"chat_id":104291596,"text":"*Maria* из группы *Тюлени* вызывает через *30* минут\n\nGleb - Нет\nZhambyl - Нет\nMaria - Да\n","message_id":3434,"reply_markup":{"inline_keyboard":[[{"text":"Да","callback_data":"MKcSiStqDUZs"},{"text":"Нет","callback_data":"oLEziJiWmAPK"}],[{"text":"Отменить","callback_data":"vATdjZyEvvms"}]]},"parse_mode":"Markdown"}
-panic: HTTP ERROR: url - https://api.telegram.org/bot366621722:AAH5scmfkscK8_Es0dNIJj8gZ-lxluCYD1o/editMessageText
-, status code - 400 body - {"ok":false,"error_code":400,"description":"Bad Request: message to edit not found"}
-
-*/
-		smokerContext.Context.SendReply(r)
+		go smokerContext.Context.SendReply(r)
+		if msg != "" {
+			if smokerContext.Account.ChatId != chatId {
+				go s.notifyOne(msg, smokerContext)
+			}
+		}
 	}
 }
