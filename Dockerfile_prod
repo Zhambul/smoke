@@ -1,7 +1,7 @@
 FROM golang
 
 COPY . /go/src/smoke3/
-COPY ./lib/go_bot /go/src/bot
+COPY ./lib/TelegramBot-library /go/src/bot
 WORKDIR /go/src/smoke3
 RUN go get
 RUN go install

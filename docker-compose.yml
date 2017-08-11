@@ -1,7 +1,9 @@
 version: '2'
 services:
   app:
-    build: .
+    build: 
+        context: .
+        dockerfile: Dockerfile_prod
     depends_on:
       - "postgres"
     environment:
