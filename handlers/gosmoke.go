@@ -54,7 +54,7 @@ func (h *ChooseTimeHandler) Handle(c *bot.Context) *bot.Response {
 	r := c.CurrentResponse
 	r.Text = "Через сколько минут?"
 	r.ClearButtons()
-	r.AddButtonRow(h.goSmokeButton(5), h.goSmokeButton(10), h.goSmokeButton(15))
+	r.AddButtonRow(h.goSmokeButton(1), h.goSmokeButton(10), h.goSmokeButton(15))
 	r.AddButtonRow(h.goSmokeButton(20), h.goSmokeButton(30), h.goSmokeButton(40))
 	r.AddButtonString("Отменв", &StartHandler{})
 	return r
@@ -127,7 +127,7 @@ type AnswerHandler struct {
 }
 
 func (h *AnswerHandler) Handle(c *bot.Context) *bot.Response {
-	h.Smoke.SetAnswer(c.BotAccount, c.CurrentResponse.ClickedButton.Text)
+	h.Smoke.SetAnswer(c.BotAccount, c.CurrentResponse.ClickedButton.Text == "Да")
 	return nil
 }
 
