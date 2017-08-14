@@ -93,7 +93,7 @@ func (s *Smoke) Start() {
 
 func (s *Smoke) timeLoop() {
 	log.Println("Smoke::timeLoop START")
-	t := time.NewTicker(1 * time.Second)
+	t := time.NewTicker(1 * time.Minute)
 	for {
 		<-t.C
 		log.Println("decrementing min")
