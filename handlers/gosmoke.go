@@ -97,8 +97,7 @@ func (h *GoSmokeGroupHandler) Handle(c *bot.Context) *bot.Response {
 			Smoke: s,
 		}
 	}
-	s.Start()
-
+	go s.Start()
 	return nil
 }
 
