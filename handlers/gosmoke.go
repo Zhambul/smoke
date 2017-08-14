@@ -54,9 +54,16 @@ func (h *ChooseTimeHandler) Handle(c *bot.Context) *bot.Response {
 	r := c.CurrentResponse
 	r.Text = "Через сколько минут?"
 	r.ClearButtons()
-	r.AddButtonRow(h.goSmokeButton(0), h.goSmokeButton(5), h.goSmokeButton(10))
+	r.AddButton(&bot.Button{
+		Text: "Сейчас",
+		Handler: &GoSmokeGroupHandler{
+			min:   0,
+			group: h.group,
+		},
+	})
+	r.AddButtonRow(h.goSmokeButton(5), h.goSmokeButton(10), h.goSmokeButton(15))
 	r.AddButtonRow(h.goSmokeButton(20), h.goSmokeButton(30), h.goSmokeButton(40))
-	r.AddButtonString("Отменв", &StartHandler{})
+	r.AddButtonString("Отменить", &StartHandler{})
 	return r
 }
 
