@@ -77,6 +77,7 @@ func NewSmoke(g *domain.Group, creatorChatId int, min int) *Smoke {
 		if acc.ChatId == creatorChatId {
 			s.CreatorSC = sc
 			s.CreatorSC.Going = true
+			s.CreatorSC.Answered = true
 		}
 
 		s.SCs[acc.ChatId] = sc
