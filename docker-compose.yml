@@ -6,17 +6,11 @@ services:
         dockerfile: Dockerfile_prod
     depends_on:
       - "postgres"
-    environment:
-      - TOKEN
-      - POSTGRES_HOST
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
+    env_file:
+      - conf.env
   postgres:
     image: postgres
     volumes:
       - /Users/zhambyl/qwe/data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
+    env_file:
+      - conf.env
