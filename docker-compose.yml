@@ -13,4 +13,4 @@ services:
     volumes:
       - /Users/zhambyl/qwe/data:/var/lib/postgresql/data
     env_file:
-      - conf.env
+          - conf.env

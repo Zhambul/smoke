@@ -17,7 +17,7 @@ func (t *StartJoinGroupHandler) Handle(c *bot.Context) *bot.Response {
 	g, err := db.GetGroupByUUID(uuid)
 	if err != nil {
 		return &bot.Response{
-			Text: "Группа *" + g.Name + "* не найдена",
+			Text: "Группа не найдена",
 		}
 	}
 
