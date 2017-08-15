@@ -88,7 +88,7 @@ func NewSmoke(g *domain.Group, creatorChatId int, min int) *Smoke {
 
 func (s *Smoke) Start() {
 	go s.timeLoop()
-	s.update()
+	go s.update()
 }
 
 func (s *Smoke) timeLoop() {
