@@ -3,9 +3,7 @@ package smoke
 import (
 	"bot/bot"
 	"smoke3/domain"
-	"strconv"
 	"sync"
-	"time"
 	"log"
 	"smoke3/util"
 )
