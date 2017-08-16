@@ -112,6 +112,10 @@ func (s *Smoke) timeLoop() {
 			if s.goingSmokers() > 1 {
 				log.Println("Group's going")
 				go s.notifyAll("Группа *"+s.group.Name+"* выходит", 0)
+				go func() {
+					time.Sleep(10 * time.Minute)
+					s.Cancel()
+				}()
 			} else {
 				log.Println("Group's not going")
 				s.Cancel()
