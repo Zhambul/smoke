@@ -138,7 +138,7 @@ func (s *Smoke) notifyOne(msg string, smokerContext *SmokerContext) {
 		Text: msg,
 	}
 
-	smokerContext.Context.SendReply(r)
+	smokerContext.Context.Send(r)
 	time.Sleep(5 * time.Second)
 	smokerContext.Context.DeleteResponse(r)
 	log.Println("Smoke::notifyOne END")
@@ -232,7 +232,7 @@ func (s *Smoke) updateWithNotify(msg string, omitChatId int) {
 	for _, smokerContext := range s.SCs {
 		r := smokerContext.PostResponse
 		r.Text = s.format()
-		go smokerContext.Context.SendReply(r)
+		go smokerContext.Context.Send(r)
 		if msg != "" {
 			if smokerContext.Account.ChatId != omitChatId {
 				go s.notifyOne(msg, smokerContext)

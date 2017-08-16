@@ -40,7 +40,7 @@ func (t *StartJoinGroupHandler) Handle(c *bot.Context) *bot.Response {
 					Text: "*" + c.BotAccount.FirstName + " " + c.BotAccount.LastName + "* присоеденился " +
 						"в группу *" + g.Name + "*",
 				}
-				go accContext.SendReply(r)
+				go accContext.Send(r)
 			}
 		}
 	}()
