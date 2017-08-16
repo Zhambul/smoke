@@ -28,38 +28,6 @@ type Smoke struct {
 	lock      sync.Mutex
 }
 
-func (s *Smoke) SetComment(botAcc *bot.BotAccount, comment string) {
-	log.Println("Smoke::SetComment START")
-	log.Println("Smoke::lock")
-	s.lock.Lock()
-	s.SCs[botAcc.ChatId].Comment = comment
-	log.Println("Smoke::unlock")
-	s.lock.Unlock()
-	go s.updateWithNotify("*"+botAcc.FirstName+"* - "+comment, botAcc.ChatId)
-	log.Println("Smoke::SetComment END")
-}
-
-func (s *Smoke) SetAnswer(botAcc *bot.BotAccount, going bool) {
-	log.Println("Smoke::SetAnswer START")
-	log.Println("Smoke::lock")
-	s.lock.Lock()
-	s.SCs[botAcc.ChatId].Answered = true
-	if s.SCs[botAcc.ChatId].Going != going {
-		s.SCs[botAcc.ChatId].Going = going
-		go s.updateWithNotify("*"+botAcc.FirstName+"* - "+boolToAnswer(going), botAcc.ChatId)
-	}
-	log.Println("Smoke::unlock")
-	s.lock.Unlock()
-	log.Println("Smoke::SetAnswer END")
-}
-
-func boolToAnswer(going bool) string {
-	if going {
-		return "Да"
-	}
-	return "Нет"
-}
-
 func NewSmoke(g *domain.Group, creatorChatId int, min int) *Smoke {
 	log.Println("NewSmoke START")
 	s := &Smoke{
@@ -88,89 +56,8 @@ func NewSmoke(g *domain.Group, creatorChatId int, min int) *Smoke {
 }
 
 func (s *Smoke) Start() {
-	go s.timeLoop()
 	go s.update()
-}
-
-func (s *Smoke) timeLoop() {
-	log.Println("Smoke::timeLoop START")
-	t := time.NewTicker(1 * time.Minute)
-	for {
-		<-t.C
-		log.Println("decrementing min")
-		log.Println("Smoke:lock")
-		s.lock.Lock()
-		s.min--
-		log.Println("Smoke:unlock")
-		s.lock.Unlock()
-		if s.min == 5 {
-			if s.goingSmokers() > 1 {
-				go s.notifyAll("Группа *"+s.group.Name+"* выходит через 5 минут", 0)
-			}
-		}
-		if s.min <= 0 {
-			if s.goingSmokers() > 1 {
-				log.Println("Group's going")
-				go s.notifyAll("Группа *"+s.group.Name+"* выходит", 0)
-				go func() {
-					time.Sleep(10 * time.Minute)
-					s.Cancel()
-				}()
-			} else {
-				log.Println("Group's not going")
-				s.Cancel()
-			}
-			break
-		}
-		s.update()
-
-	}
-	log.Println("Smoke::timeLoop END")
-}
-
-func (s *Smoke) notifyOne(msg string, smokerContext *SmokerContext) {
-	log.Println("Smoke::notifyOne START")
-	if s.cancelled {
-		return
-	}
-
-	if !s.SCs[smokerContext.Account.ChatId].Going {
-		return
-	}
-
-	r := &bot.Response{
-		Text: msg,
-	}
-
-	smokerContext.Context.Send(r)
-	time.Sleep(5 * time.Second)
-	smokerContext.Context.DeleteResponse(r)
-	log.Println("Smoke::notifyOne END")
-}
-
-func (s *Smoke) goingSmokers() int {
-	log.Println("Smoke::goingSmokers START")
-	log.Println("Smoke::lock")
-	s.lock.Lock()
-	goingSmokers := 0
-	for _, sc := range s.SCs {
-		if sc.Going {
-			goingSmokers++
-		}
-	}
-	log.Println("Smoke::unlock")
-	s.lock.Unlock()
-	log.Println("Smoke::goingSmokers END")
-	return goingSmokers
-}
-
-func (s *Smoke) notifyAll(msg string, omitChatId int) {
-	for _, smokerContext := range s.SCs {
-		if smokerContext.Account.ChatId == omitChatId || !smokerContext.Going {
-			continue
-		}
-		go s.notifyOne(msg, smokerContext)
-	}
+	go s.lifecycle()
 }
 
 func (s *Smoke) Cancel() {
@@ -191,34 +78,30 @@ func (s *Smoke) Cancel() {
 	log.Println("Smoke::Cancel END")
 }
 
-func (s *Smoke) format() string {
-	log.Println("Smoke::format START")
-	var when string
-	if s.min < 1 {
-		when = "сейчас"
-	} else {
-		when = "через *" + strconv.Itoa(s.min) + "* минут"
+
+func (s *Smoke) SetComment(botAcc *bot.BotAccount, comment string) {
+	log.Println("Smoke::SetComment START")
+	log.Println("Smoke::lock")
+	s.lock.Lock()
+	s.SCs[botAcc.ChatId].Comment = comment
+	log.Println("Smoke::unlock")
+	s.lock.Unlock()
+	go s.updateWithNotify("*"+botAcc.FirstName+"* - "+comment, botAcc.ChatId)
+	log.Println("Smoke::SetComment END")
+}
+
+func (s *Smoke) SetAnswer(botAcc *bot.BotAccount, going bool) {
+	log.Println("Smoke::SetAnswer START")
+	log.Println("Smoke::lock")
+	s.lock.Lock()
+	s.SCs[botAcc.ChatId].Answered = true
+	if s.SCs[botAcc.ChatId].Going != going {
+		s.SCs[botAcc.ChatId].Going = going
+		go s.updateWithNotify("*"+botAcc.FirstName+"* - "+boolToAnswer(going), botAcc.ChatId)
 	}
-
-	res := "*" + s.CreatorSC.Account.FirstName + "* из группы *" +
-		s.group.Name + "*" + " вызывает " + when + "\n\n"
-
-	for _, sc := range s.SCs {
-		if sc.Answered {
-			res += sc.Account.FirstName + " - " + boolToAnswer(sc.Going)
-		} else {
-			res += sc.Account.FirstName + " - "
-		}
-
-		if sc.Comment != "" {
-			res += ", _" + sc.Comment + "_ "
-		}
-		res += "\n"
-	}
-
-	res += "\n_Ответьте на это сообщение для комментария_"
-	log.Println("Smoke::format END")
-	return res
+	log.Println("Smoke::unlock")
+	s.lock.Unlock()
+	log.Println("Smoke::SetAnswer END")
 }
 
 func (s *Smoke) update() {
