@@ -6,6 +6,7 @@ import (
 	"sync"
 	"log"
 	"smoke3/util"
+	"strconv"
 )
 
 type SmokerContext struct {
@@ -100,29 +101,4 @@ func (s *Smoke) SetAnswer(botAcc *bot.BotAccount, going bool) {
 	log.Println("Smoke::unlock")
 	s.lock.Unlock()
 	log.Println("Smoke::SetAnswer END")
-}
-
-func (s *Smoke) update() {
-	log.Println("Smoke::update START")
-	s.updateWithNotify("", 0)
-	log.Println("Smoke::update END")
-}
-
-func (s *Smoke) updateWithNotify(msg string, omitChatId int) {
-	log.Println("Smoke::updateWithNotify START")
-	if s.cancelled {
-		return
-	}
-
-	for _, smokerContext := range s.SCs {
-		r := smokerContext.PostResponse
-		r.Text = s.format()
-		go smokerContext.Context.Send(r)
-		if msg != "" {
-			if smokerContext.Account.ChatId != omitChatId {
-				go s.notifyOne(msg, smokerContext)
-			}
-		}
-	}
-	log.Println("Smoke::updateWithNotify END")
 }
