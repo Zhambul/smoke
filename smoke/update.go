@@ -4,6 +4,7 @@ import (
 	"time"
 	"strconv"
 	"log"
+	"bot/bot"
 )
 
 func (s *Smoke) update() {

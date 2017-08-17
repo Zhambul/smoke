@@ -6,7 +6,6 @@ import (
 	"sync"
 	"log"
 	"smoke3/util"
-	"strconv"
 )
 
 type SmokerContext struct {
