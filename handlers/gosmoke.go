@@ -122,7 +122,7 @@ type CancelSmokeHandler struct {
 }
 
 func (h *CancelSmokeHandler) Handle(c *bot.Context) *bot.Response {
-	h.Smoke.Cancel()
+	go h.Smoke.Cancel()
 	return nil
 }
 

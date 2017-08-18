@@ -32,7 +32,6 @@ func (s *Smoke) updateWithNotify(msg string, omitChatId int) {
 	log.Println("Smoke::updateWithNotify END")
 }
 
-
 func (s *Smoke) format() string {
 	log.Println("Smoke::format START")
 	var when string
@@ -129,10 +128,6 @@ func (s *Smoke) notifyAllExcept(msg string, omitChatId int) {
 }
 
 func (s *Smoke) delayedCancel(min int) {
-	go func() {
-		time.Sleep(time.Duration(min) * time.Minute)
-		s.Cancel()
-	}()
+	time.Sleep(time.Duration(min) * time.Minute)
+	s.Cancel()
 }
-
-

@@ -24,7 +24,7 @@ func (s *Smoke) tick() (end bool) {
 		s.onFiveMinutes()
 	}
 
-	if s.min == 0 {
+	if s.min <= 0 {
 		s.onZeroMinutes()
 		end = true
 	}
@@ -43,9 +43,9 @@ func (s *Smoke) onZeroMinutes() {
 	if s.goingSmokers() > 1 {
 		log.Println("Group's going")
 		go s.notifyAll("Группа *" + s.group.Name + "* выходит")
-		s.delayedCancel(10)
+		go s.delayedCancel(10)
 	} else {
 		log.Println("Group's not going")
-		s.Cancel()
+		go s.Cancel()
 	}
 }

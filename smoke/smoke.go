@@ -61,19 +61,21 @@ func (s *Smoke) Start() {
 func (s *Smoke) Cancel() {
 	log.Println("Smoke::Cancel START")
 	log.Println("Smoke::lock")
-
 	s.lock.Lock()
+	defer func() {
+		log.Println("Smoke::unlock")
+		s.lock.Unlock()
+		log.Println("Smoke::Cancel END")
+	}()
+
 	if s.cancelled {
 		return
 	}
 	s.cancelled = true
 
-	for _, smokerContext := range s.SCs {
-		go smokerContext.Context.DeleteResponse(smokerContext.PostResponse)
+	for _, sc := range s.SCs {
+		go sc.Context.DeleteResponse(sc.PostResponse)
 	}
-	log.Println("Smoke::unlock")
-	s.lock.Unlock()
-	log.Println("Smoke::Cancel END")
 }
 
 
