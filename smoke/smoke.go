@@ -78,7 +78,6 @@ func (s *Smoke) Cancel() {
 	}
 }
 
-
 func (s *Smoke) SetComment(botAcc *bot.BotAccount, comment string) {
 	log.Println("Smoke::SetComment START")
 	log.Println("Smoke::lock")
