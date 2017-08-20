@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"log"
 	"bot/bot"
+	"sort"
 )
 
 func (s *Smoke) update() {
@@ -44,22 +45,37 @@ func (s *Smoke) format() string {
 	res := "*" + s.getUniqueUserName(s.CreatorSC.Account) + "* из группы *" +
 		s.group.Name + "*" + " вызывает " + when + "\n\n"
 
-	for _, sc := range s.SCs {
-		if sc.Answered {
-			res += s.getUniqueUserName(sc.Account) + " - " + boolToAnswer(sc.Going)
-		} else {
-			res += s.getUniqueUserName(sc.Account) + " - "
-		}
+	var keys []int
+	for chatId := range s.SCs {
+		keys = append(keys, chatId)
+	}
 
-		if sc.Comment != "" {
-			res += ", _" + sc.Comment + "_ "
-		}
+	sort.Ints(keys)
+
+	for _, chatId := range keys {
+		sc := s.SCs[chatId]
+		res += s.answer(sc)
+		res += s.comment(sc)
 		res += "\n"
 	}
 
 	res += "\n_Ответьте на это сообщение для комментария_"
 	log.Println("Smoke::format END")
 	return res
+}
+
+func (s *Smoke) answer(sc *SmokerContext) string {
+	if sc.Answered {
+		return s.getUniqueUserName(sc.Account) + " - " + boolToAnswer(sc.Going)
+	}
+	return s.getUniqueUserName(sc.Account) + " - "
+}
+
+func (s *Smoke) comment(sc *SmokerContext) string {
+	if sc.Comment != "" {
+		return ", _" + sc.Comment + "_ "
+	}
+	return ""
 }
 
 func (s *Smoke) notifyOne(msg string, smokerContext *SmokerContext) {
