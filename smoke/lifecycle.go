@@ -7,6 +7,10 @@ import (
 
 func (s *Smoke) lifecycle() {
 	log.Println("Smoke::lifecycle START")
+	if s.min == 0 {
+		log.Println("Smoke::lifecycle END")
+		return
+	}
 	t := time.NewTicker(1 * time.Minute)
 	for {
 		<-t.C

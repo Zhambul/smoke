@@ -41,14 +41,14 @@ func (s *Smoke) format() string {
 		when = "через *" + strconv.Itoa(s.min) + "* минут"
 	}
 
-	res := "*" + s.CreatorSC.Account.FirstName + "* из группы *" +
+	res := "*" + s.getUniqueUserName(s.CreatorSC.Account) + "* из группы *" +
 		s.group.Name + "*" + " вызывает " + when + "\n\n"
 
 	for _, sc := range s.SCs {
 		if sc.Answered {
-			res += sc.Account.FirstName + " - " + boolToAnswer(sc.Going)
+			res += s.getUniqueUserName(sc.Account) + " - " + boolToAnswer(sc.Going)
 		} else {
-			res += sc.Account.FirstName + " - "
+			res += s.getUniqueUserName(sc.Account) + " - "
 		}
 
 		if sc.Comment != "" {

@@ -58,6 +58,15 @@ func (s *Smoke) Start() {
 	go s.lifecycle()
 }
 
+func (s *Smoke) getUniqueUserName(acc *domain.Account) string {
+	for _, sc := range s.SCs {
+		if sc.Account.FirstName == acc.FirstName {
+			return acc.FirstName + " " + acc.LastName
+		}
+	}
+	return acc.FirstName
+}
+
 func (s *Smoke) Cancel() {
 	log.Println("Smoke::Cancel START")
 	log.Println("Smoke::lock")
