@@ -60,8 +60,10 @@ func (s *Smoke) Start() {
 
 func (s *Smoke) getUniqueUserName(acc *domain.Account) string {
 	for _, sc := range s.SCs {
-		if sc.Account.FirstName == acc.FirstName {
-			return acc.FirstName + " " + acc.LastName
+		if sc.Account.ChatId != acc.ChatId {
+			if sc.Account.FirstName == acc.FirstName {
+				return acc.FirstName + " " + acc.LastName
+			}
 		}
 	}
 	return acc.FirstName
