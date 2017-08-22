@@ -117,6 +117,14 @@ func (h *ReplyHandler) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.SetComment(c.BotAccount, c.Message.Text)
 	return nil
 }
+type ChangeTimeHandlerStart struct {
+	Smoke *smoke.Smoke
+}
+
+func (h *ChangeTimeHandlerStart) Handle(c *bot.Context) *bot.Response {
+	go h.Smoke.Cancel()
+	return nil
+}
 
 type CancelSmokeHandler struct {
 	Smoke *smoke.Smoke

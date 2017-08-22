@@ -14,11 +14,16 @@ func (s *Smoke) lifecycle() {
 	}
 	t := time.NewTicker(1 * time.Minute)
 	for {
-		<-t.C
-		log.Println("Smoke::lifecycle. Tick")
-		if end := s.tick(); end {
+		switch {
+		case <-t.C:
+			log.Println("Smoke::lifecycle. Tick")
+			if end := s.tick(); end {
+				break
+			}
+		case <-s.cancelLifecycle:
 			break
 		}
+
 	}
 	log.Println("Smoke::lifecycle END")
 }

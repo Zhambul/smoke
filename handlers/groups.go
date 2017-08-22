@@ -125,11 +125,11 @@ func (h *OneGroupHandler) Handle(c *bot.Context) *bot.Response {
 		r.AddButtonString("Покинуть", &LeaveGroupHandle{h.group})
 	}
 	if h.group.CreatorAccount.ChatId == c.BotAccount.ChatId {
-		r.AddButtonString("Удалить", &DeleteGroupHandler{h.group})
 		r.AddButtonString("Изменить название", &ChangeGroupNameHandlerStart{
 			group: h.group,
 			back:  h,
 		})
+		r.AddButtonString("Удалить", &DeleteGroupHandler{h.group})
 	}
 	r.AddButtonString("Назад", &GroupsHandler{h.groups})
 

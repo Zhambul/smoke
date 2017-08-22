@@ -18,20 +18,22 @@ type SmokerContext struct {
 }
 
 type Smoke struct {
-	group     *domain.Group
-	min       int
-	cancelled bool
-	SCs       map[int]*SmokerContext
-	CreatorSC *SmokerContext
-	lock      sync.Mutex
+	group           *domain.Group
+	min             int
+	cancelled       bool
+	cancelLifecycle chan bool
+	SCs             map[int]*SmokerContext
+	CreatorSC       *SmokerContext
+	lock            sync.Mutex
 }
 
 func NewSmoke(g *domain.Group, creatorChatId int, min int) *Smoke {
 	log.Println("NewSmoke START")
 	s := &Smoke{
-		min:   min,
-		group: g,
-		SCs:   make(map[int]*SmokerContext, 0),
+		min:             min,
+		group:           g,
+		SCs:             make(map[int]*SmokerContext, 0),
+		cancelLifecycle: make(chan bool),
 	}
 
 	for _, acc := range g.Accounts {
@@ -67,6 +69,22 @@ func (s *Smoke) getUniqueUserName(acc *domain.Account) string {
 		}
 	}
 	return acc.FirstName
+}
+
+func (s *Smoke) ChangeTime(min int) {
+	log.Println("Smoke::ChangeTime START")
+	log.Println("Smoke::lock")
+	s.lock.Lock()
+	defer func() {
+		log.Println("Smoke::unlock")
+		s.lock.Unlock()
+		log.Println("Smoke::ChangeTime END")
+	}()
+	s.cancelLifecycle <- true
+	s.min = min
+	s.cancelLifecycle = make(chan bool)
+	go s.lifecycle()
+	go s.update()
 }
 
 func (s *Smoke) Cancel() {
