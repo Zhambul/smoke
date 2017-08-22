@@ -82,6 +82,7 @@ func (s *Smoke) LockUserUpdate(acc *bot.BotAccount) {
 func (s *Smoke) UnlockUserUpdate(acc *bot.BotAccount) {
 	s.lock.Lock()
 	s.SCs[acc.ChatId].Locked = false
+	go s.update()
 	s.lock.Unlock()
 }
 
