@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"smoke3/smoke"
 	"smoke3/util"
+	"strings"
 )
 
 type GoSmokeHandler struct {
@@ -133,7 +134,9 @@ type AnswerHandler struct {
 }
 
 func (h *AnswerHandler) Handle(c *bot.Context) *bot.Response {
-	h.Smoke.SetAnswer(c.BotAccount, c.CurrentResponse.ClickedButton.Text == "Да")
+	answer := c.CurrentResponse.ClickedButton.Text
+	answer = strings.TrimSpace(answer)
+	h.Smoke.SetAnswer(c.BotAccount, answer == "Да")
 	return nil
 }
 
