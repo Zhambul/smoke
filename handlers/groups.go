@@ -62,14 +62,14 @@ type GiveGroupNameHandlerEnd struct {
 }
 
 func (h *GiveGroupNameHandlerEnd) Handle(c *bot.Context) *bot.Response {
-	r := c.CurrentResponse
 	h.group.Name = c.Message.Text
 	if err := db.ChangeGroupName(h.group); err != nil {
 		log.Printf("ERROR: %v\n", err)
 	}
+	r := c.CurrentResponse
+	r.ClearButtons()
 	r.Text = "Название изменено на *" + c.Message.Text + "*"
 	r.AddButtonString("Назад", h.back)
-	r.ClearButtons()
 	return r
 }
 
