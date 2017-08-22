@@ -16,6 +16,7 @@ type SmokerContext struct {
 	Going        bool
 	Answered     bool
 	Comment      string
+	Locked       bool
 }
 
 type Smoke struct {
@@ -70,6 +71,18 @@ func (s *Smoke) getUniqueUserName(acc *domain.Account) string {
 		}
 	}
 	return acc.FirstName
+}
+
+func (s *Smoke) LockUserUpdate(acc *bot.BotAccount) {
+	s.lock.Lock()
+	s.SCs[acc.ChatId].Locked = true
+	s.lock.Unlock()
+}
+
+func (s *Smoke) UnlockUserUpdate(acc *bot.BotAccount) {
+	s.lock.Lock()
+	s.SCs[acc.ChatId].Locked = false
+	s.lock.Unlock()
 }
 
 func (s *Smoke) ChangeTime(min int) {

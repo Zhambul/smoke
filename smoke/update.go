@@ -20,13 +20,19 @@ func (s *Smoke) updateWithNotify(msg string, omitChatId int) {
 		return
 	}
 
-	for _, smokerContext := range s.SCs {
-		r := smokerContext.PostResponse
+	for _, sc := range s.SCs {
+		s.lock.Lock()
+		if sc.Locked {
+			continue
+		}
+		s.lock.Unlock()
+
+		r := sc.PostResponse
 		r.Text = s.format()
-		go smokerContext.Context.Send(r)
+		go sc.Context.Send(r)
 		if msg != "" {
-			if smokerContext.Account.ChatId != omitChatId {
-				go s.notifyOne(msg, smokerContext)
+			if sc.Account.ChatId != omitChatId {
+				go s.notifyOne(msg, sc)
 			}
 		}
 	}

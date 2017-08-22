@@ -114,10 +114,10 @@ func setCreatorButtons(sr *bot.Response, s *smoke.Smoke)  {
 		Smoke: s,
 	}
 	sr.AddButtonRow(&bot.Button{Handler: a, Text: "Да"}, &bot.Button{Handler: a, Text: "Нет"})
-	sr.AddButtonString("Отменить", &CancelSmokeHandler{
+	sr.AddButtonString("Изменить время", &ChangeTimeHandlerStart{
 		Smoke: s,
 	})
-	sr.AddButtonString("Изменить время", &ChangeTimeHandlerStart{
+	sr.AddButtonString("Отменить", &CancelSmokeHandler{
 		Smoke: s,
 	})
 }
@@ -136,6 +136,7 @@ type ChangeTimeHandlerStart struct {
 }
 
 func (h *ChangeTimeHandlerStart) Handle(c *bot.Context) *bot.Response {
+	h.Smoke.LockUserUpdate(c.BotAccount)
 	r := c.CurrentResponse
 	r.Text = "Через сколько минут?"
 	r.ClearButtons()
@@ -158,6 +159,7 @@ type ChangeTimeHandlerEnd struct {
 }
 
 func (h *ChangeTimeHandlerEnd) Handle(c *bot.Context) *bot.Response {
+	h.Smoke.UnlockUserUpdate(c.BotAccount)
 	h.Smoke.ChangeTime(h.min)
 	r := h.Smoke.CreatorSC.PostResponse
 	r.ClearButtons()
