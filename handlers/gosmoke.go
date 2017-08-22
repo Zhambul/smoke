@@ -93,23 +93,27 @@ func (h *GoSmokeGroupHandler) Handle(c *bot.Context) *bot.Response {
 			Smoke: s,
 		}
 
-		smokerResponse := smokerContext.PostResponse
-		smokerResponse.AddButtonRow(&bot.Button{Handler: a, Text: "Да"}, &bot.Button{Handler: a, Text: "Нет"})
+		sr := smokerContext.PostResponse
+		sr.AddButtonRow(&bot.Button{Handler: a, Text: "Да"}, &bot.Button{Handler: a, Text: "Нет"})
 
 		if smokerContext.Account.ChatId == c.BotAccount.ChatId {
-			smokerResponse.AddButtonString("Отменить", &CancelSmokeHandler{
-				Smoke: s,
-			})
-			smokerResponse.AddButtonString("Изменить время", &ChangeTimeHandlerStart{
-				Smoke: s,
-			})
+			setCreatorButtons(sr, s)
 		}
-		smokerResponse.ReplyHandler = &ReplyHandler{
+		sr.ReplyHandler = &ReplyHandler{
 			Smoke: s,
 		}
 	}
 	go s.Start()
 	return nil
+}
+
+func setCreatorButtons(sr *bot.Response, s *smoke.Smoke)  {
+	sr.AddButtonString("Отменить", &CancelSmokeHandler{
+		Smoke: s,
+	})
+	sr.AddButtonString("Изменить время", &ChangeTimeHandlerStart{
+		Smoke: s,
+	})
 }
 
 type ReplyHandler struct {
@@ -149,6 +153,9 @@ type ChangeTimeHandlerEnd struct {
 
 func (h *ChangeTimeHandlerEnd) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.ChangeTime(h.min)
+	r := h.Smoke.CreatorSC.PostResponse
+	r.ClearButtons()
+	setCreatorButtons(r, h.Smoke)
 	return nil
 }
 
