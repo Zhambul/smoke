@@ -148,7 +148,7 @@ func (s *Smoke) delayedCancel(min int) {
 		case <-t.C:
 			log.Println("Smoke::delayedCancel END")
 			s.Cancel()
-		case <-s.cancelLifecycle:
+		case <-s.cancelDelayedCancel:
 			log.Println("Smoke::delayedCancel END. cancelLifecycle")
 			return
 	}
