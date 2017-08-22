@@ -9,11 +9,13 @@ func (s *Smoke) lifecycle() {
 	log.Println("Smoke::lifecycle START")
 	if s.min == 0 {
 		log.Println("Smoke::lifecycle END")
+		go s.delayedCancel(10)
 		return
 	}
 	t := time.NewTicker(1 * time.Minute)
 	for {
 		<-t.C
+		log.Println("Smoke::lifecycle. Tick")
 		if end := s.tick(); end {
 			break
 		}

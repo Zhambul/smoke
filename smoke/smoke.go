@@ -104,15 +104,18 @@ func (s *Smoke) SetAnswer(botAcc *bot.BotAccount, going bool) {
 	log.Println("Smoke::SetAnswer START")
 	log.Println("Smoke::lock")
 	s.lock.Lock()
-	s.SCs[botAcc.ChatId].Answered = true
-	if s.SCs[botAcc.ChatId].Going != going {
+	defer func() {
+		log.Println("Smoke::unlock")
+		s.lock.Unlock()
+		log.Println("Smoke::SetAnswer END")
+	}()
+
+	if s.SCs[botAcc.ChatId].Going != going || !s.SCs[botAcc.ChatId].Answered {
+		s.SCs[botAcc.ChatId].Answered = true
 		log.Println("Smoke::SetAnswer going changed")
 		s.SCs[botAcc.ChatId].Going = going
 		go s.updateWithNotify("*"+botAcc.FirstName+"* - "+boolToAnswer(going), botAcc.ChatId)
 	} else {
 		log.Println("Smoke::SetAnswer going not changed")
 	}
-	log.Println("Smoke::unlock")
-	s.lock.Unlock()
-	log.Println("Smoke::SetAnswer END")
 }

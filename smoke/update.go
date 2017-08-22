@@ -144,6 +144,8 @@ func (s *Smoke) notifyAllExcept(msg string, omitChatId int) {
 }
 
 func (s *Smoke) delayedCancel(min int) {
+	log.Println("Smoke::delayedCancel START")
 	time.Sleep(time.Duration(min) * time.Minute)
 	s.Cancel()
+	log.Println("Smoke::delayedCancel END")
 }
