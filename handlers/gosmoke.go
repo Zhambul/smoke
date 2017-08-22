@@ -99,6 +99,7 @@ func (h *GoSmokeGroupHandler) Handle(c *bot.Context) *bot.Response {
 		if smokerContext.Account.ChatId == c.BotAccount.ChatId {
 			setCreatorButtons(sr, s)
 		}
+
 		sr.ReplyHandler = &ReplyHandler{
 			Smoke: s,
 		}
@@ -108,6 +109,11 @@ func (h *GoSmokeGroupHandler) Handle(c *bot.Context) *bot.Response {
 }
 
 func setCreatorButtons(sr *bot.Response, s *smoke.Smoke)  {
+	sr.ClearButtons()
+	a := &AnswerHandler{
+		Smoke: s,
+	}
+	sr.AddButtonRow(&bot.Button{Handler: a, Text: "Да"}, &bot.Button{Handler: a, Text: "Нет"})
 	sr.AddButtonString("Отменить", &CancelSmokeHandler{
 		Smoke: s,
 	})
