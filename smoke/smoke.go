@@ -113,7 +113,6 @@ func (s *Smoke) ChangeTime(min int) {
 	} else {
 		go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
 			"* изменил время на *сейчас*", s.CreatorSC.Account.ChatId)
-
 	}
 }
 
