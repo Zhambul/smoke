@@ -10,6 +10,11 @@ import (
 var NotFound = errors.New("Not Found")
 var NotUnique = errors.New("Not Unique")
 
+func ChangeGroupName(g *domain.Group) error {
+	_, err := db.Exec(`UPDATE "group" SET name=$1 WHERE id=$2`, g.Name, g.Id)
+	return err
+}
+
 func CreateNewGroup(account *domain.Account, groupName string) (*domain.Group, error) {
 	log.Println("createNewGroup START")
 	tx, _ := db.Begin()

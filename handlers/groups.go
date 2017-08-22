@@ -28,7 +28,7 @@ type CreateGroupHandler struct {
 }
 
 func (h *CreateGroupHandler) Handle(c *bot.Context) *bot.Response {
-	c.NextHandler = &GiveGroupNameHandler{}
+	c.NextHandler = &ChangeGroupNameHandlerStart{}
 
 	r := c.CurrentResponse
 	r.ClearButtons()
@@ -37,11 +37,47 @@ func (h *CreateGroupHandler) Handle(c *bot.Context) *bot.Response {
 	return r
 }
 
-type GiveGroupNameHandler struct {
+type ChangeGroupNameHandlerStart struct {
+	group *domain.Group
+	back  *OneGroupHandler
 }
 
-func (h *GiveGroupNameHandler) Handle(c *bot.Context) *bot.Response {
-	log.Println("GiveGroupNameHandler START")
+func (h *ChangeGroupNameHandlerStart) Handle(c *bot.Context) *bot.Response {
+	log.Println("ChangeGroupNameHandlerStart START")
+	c.NextHandler = &GiveGroupNameHandlerEnd{
+		back:  h.back,
+		group: h.group,
+	}
+	r := c.CurrentResponse
+	r.ClearButtons()
+	r.Text = "Дай новое название группе"
+	r.AddButtonString("Назад", h.back)
+	log.Println("ChangeGroupNameHandlerStart END")
+	return r
+}
+
+type GiveGroupNameHandlerEnd struct {
+	group *domain.Group
+	back  *OneGroupHandler
+}
+
+func (h *GiveGroupNameHandlerEnd) Handle(c *bot.Context) *bot.Response {
+	r := c.CurrentResponse
+	h.group.Name = c.Message.Text
+	if err := db.ChangeGroupName(h.group); err != nil {
+		log.Printf("ERROR: %v\n", err)
+	}
+	r.Text = "Название изменено на *" + c.Message.Text + "*"
+	r.AddButtonString("Назад", h.back)
+	r.ClearButtons()
+	return r
+}
+
+type SetGroupNameHandler struct {
+}
+
+func (h *SetGroupNameHandler) Handle(c *bot.Context) *bot.Response {
+	log.Println("SetGroupNameHandler START")
 	groupName := c.Message.Text
 	g, err := db.CreateNewGroup(toDomainAccount(c.BotAccount), groupName)
 	if err != nil {
@@ -61,7 +97,7 @@ func (h *GiveGroupNameHandler) Handle(c *bot.Context) *bot.Response {
 
 	r.AddButton(util.ShareButton(g))
 	r.AddButtonString("Назад", &MenuHandler{})
-	log.Printf("GiveGroupNameHandler END + %+v\n", r)
+	log.Printf("SetGroupNameHandler END + %+v\n", r)
 	return r
 }
 
@@ -90,6 +126,10 @@ func (h *OneGroupHandler) Handle(c *bot.Context) *bot.Response {
 	}
 	if h.group.CreatorAccount.ChatId == c.BotAccount.ChatId {
 		r.AddButtonString("Удалить", &DeleteGroupHandler{h.group})
+		r.AddButtonString("Изменить название", &ChangeGroupNameHandlerStart{
+			group: h.group,
+			back:  h,
+		})
 	}
 	r.AddButtonString("Назад", &GroupsHandler{h.groups})
 
