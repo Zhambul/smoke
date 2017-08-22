@@ -16,9 +16,6 @@ func (s *Smoke) update() {
 
 func (s *Smoke) updateWithNotify(msg string, omitChatId int) {
 	log.Println("Smoke::updateWithNotify START")
-	if s.cancelled {
-		return
-	}
 
 	for _, sc := range s.SCs {
 		if sc.Locked {
@@ -84,9 +81,6 @@ func (s *Smoke) comment(sc *SmokerContext) string {
 
 func (s *Smoke) notifyOne(msg string, smokerContext *SmokerContext) {
 	log.Println("Smoke::notifyOne START")
-	if s.cancelled {
-		return
-	}
 
 	if !s.SCs[smokerContext.Account.ChatId].Going {
 		return

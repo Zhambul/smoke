@@ -22,7 +22,6 @@ type SmokerContext struct {
 type Smoke struct {
 	group           *domain.Group
 	min             int
-	cancelled       bool
 	cancelLifecycle chan bool
 	SCs             map[int]*SmokerContext
 	CreatorSC       *SmokerContext
@@ -112,12 +111,6 @@ func (s *Smoke) Cancel() {
 		s.lock.Unlock()
 		log.Println("Smoke::Cancel END")
 	}()
-
-	if s.cancelled {
-		return
-	}
-	s.cancelled = true
-
 	for _, sc := range s.SCs {
 		go sc.Context.DeleteResponse(sc.PostResponse)
 	}
