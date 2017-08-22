@@ -1,6 +1,8 @@
 version: '2'
 services:
   app:
+    ports:
+      - 80:80
     build: 
         context: .
         dockerfile: Dockerfile_prod

@@ -5,4 +5,4 @@ COPY ./lib/TelegramBot-library /go/src/bot
 WORKDIR /go/src/smoke3
 RUN go get
 RUN go install
-CMD ["smoke3", "--webhook="]
+CMD ["smoke3", "--webhook=82.202.204.89:80"]
