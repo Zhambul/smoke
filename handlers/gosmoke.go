@@ -97,9 +97,12 @@ func (h *GoSmokeGroupHandler) Handle(c *bot.Context) *bot.Response {
 		smokerResponse.AddButtonRow(&bot.Button{Handler: a, Text: "Да"}, &bot.Button{Handler: a, Text: "Нет"})
 
 		if smokerContext.Account.ChatId == c.BotAccount.ChatId {
-			smokerResponse.AddButton(&bot.Button{Text: "Отменить", Handler: &CancelSmokeHandler{
+			smokerResponse.AddButtonString("Отменить", &CancelSmokeHandler{
 				Smoke: s,
-			}})
+			})
+			smokerResponse.AddButtonString("Изменить время", &ChangeTimeHandlerStart{
+				Smoke: s,
+			})
 		}
 		smokerResponse.ReplyHandler = &ReplyHandler{
 			Smoke: s,
