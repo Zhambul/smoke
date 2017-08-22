@@ -12,10 +12,17 @@ import (
 
 func main() {
 	runDDL := flag.Bool("runDDL", false, "run ddl?")
+	webhook := flag.String("host", "", "host to enable webhook")
 	flag.Parse()
 	db.Init(*runDDL)
 
 	bot.Init(os.Getenv("TOKEN"))
+
+	if *webhook != "" {
+		if err := bot.EnableWebhook(*webhook); err != nil {
+			panic(err)
+		}
+	}
 
 	bot.RegisterHandler("/start", &handlers.StartHandler{})
 	bot.RegisterHandler("/go", &handlers.GoSmokeHandler{})
