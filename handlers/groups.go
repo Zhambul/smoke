@@ -28,7 +28,7 @@ type CreateGroupHandler struct {
 }
 
 func (h *CreateGroupHandler) Handle(c *bot.Context) *bot.Response {
-	c.NextHandler = &ChangeGroupNameHandlerStart{}
+	c.NextHandler = &SetGroupNameHandler{}
 
 	r := c.CurrentResponse
 	r.ClearButtons()
