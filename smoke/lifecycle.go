@@ -21,8 +21,8 @@ func (s *Smoke) lifecycle() {
 				break
 			}
 		case <-s.cancelLifecycle:
-			log.Println("Smoke::lifecycle. Cancel")
-			break
+			log.Println("Smoke::lifecycle END. Cancel")
+			return
 		}
 	}
 	log.Println("Smoke::lifecycle END")
