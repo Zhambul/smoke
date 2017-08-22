@@ -20,13 +20,14 @@ type SmokerContext struct {
 }
 
 type Smoke struct {
-	group               *domain.Group
-	min                 int
-	cancelLifecycle     chan bool
-	cancelDelayedCancel chan bool
-	SCs                 map[int]*SmokerContext
-	CreatorSC           *SmokerContext
-	lock                sync.Mutex
+	group                *domain.Group
+	min                  int
+	cancelLifecycle      chan bool
+	cancelDelayedCancel  chan bool
+	delayedCancelEnabled bool
+	SCs                  map[int]*SmokerContext
+	CreatorSC            *SmokerContext
+	lock                 sync.Mutex
 }
 
 func NewSmoke(g *domain.Group, creatorChatId int, min int) *Smoke {
@@ -97,7 +98,9 @@ func (s *Smoke) ChangeTime(min int) {
 		log.Println("Smoke::ChangeTime END")
 	}()
 	s.cancelLifecycle <- true
-	s.cancelDelayedCancel <- true
+	if s.delayedCancelEnabled {
+		s.cancelDelayedCancel <- true
+	}
 	s.min = min
 	s.cancelLifecycle = make(chan bool)
 	go s.lifecycle()

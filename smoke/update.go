@@ -143,6 +143,10 @@ func (s *Smoke) notifyAllExcept(msg string, omitChatId int) {
 
 func (s *Smoke) delayedCancel(min int) {
 	log.Println("Smoke::delayedCancel START")
+	s.delayedCancelEnabled = true
+	defer func() {
+		s.delayedCancelEnabled = false
+	}()
 	t := time.NewTicker(time.Duration(min) * time.Minute)
 	select{
 		case <-t.C:
