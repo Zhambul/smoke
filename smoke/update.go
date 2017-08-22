@@ -28,7 +28,7 @@ func (s *Smoke) updateWithNotify(msg string, omitChatId int) {
 		s.lock.Unlock()
 
 		r := sc.PostResponse
-		r.Text = s.format()
+		r.Text = s.Format()
 		go sc.Context.Send(r)
 		if msg != "" {
 			if sc.Account.ChatId != omitChatId {
@@ -39,8 +39,8 @@ func (s *Smoke) updateWithNotify(msg string, omitChatId int) {
 	log.Println("Smoke::updateWithNotify END")
 }
 
-func (s *Smoke) format() string {
-	log.Println("Smoke::format START")
+func (s *Smoke) Format() string {
+	log.Println("Smoke::Format START")
 	var when string
 	if s.min < 1 {
 		when = "сейчас"
@@ -66,7 +66,7 @@ func (s *Smoke) format() string {
 	}
 
 	res += "\n_Ответьте на это сообщение для комментария_"
-	log.Println("Smoke::format END")
+	log.Println("Smoke::Format END")
 	return res
 }
 

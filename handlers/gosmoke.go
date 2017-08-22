@@ -157,8 +157,10 @@ type ChangeTimeHandlerCancel struct {
 
 func (h *ChangeTimeHandlerCancel) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
-	setCreatorButtons(c.CurrentResponse, h.Smoke)
-	return nil
+	r := c.CurrentResponse
+	r.Text = h.Smoke.Format()
+	setCreatorButtons(r, h.Smoke)
+	return r
 }
 
 type ChangeTimeHandlerEnd struct {
