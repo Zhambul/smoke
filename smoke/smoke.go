@@ -99,7 +99,10 @@ func (s *Smoke) ChangeTime(min int) {
 	}()
 	s.cancelLifecycle <- true
 	if s.delayedCancelEnabled {
+		log.Println("canceling delayed cancel")
 		s.cancelDelayedCancel <- true
+	} else {
+		log.Println("not canceling delayed cancel")
 	}
 	s.min = min
 	s.cancelLifecycle = make(chan bool)
