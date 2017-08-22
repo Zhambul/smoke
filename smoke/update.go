@@ -21,11 +21,9 @@ func (s *Smoke) updateWithNotify(msg string, omitChatId int) {
 	}
 
 	for _, sc := range s.SCs {
-		s.lock.Lock()
 		if sc.Locked {
 			continue
 		}
-		s.lock.Unlock()
 
 		r := sc.PostResponse
 		r.Text = s.Format()
