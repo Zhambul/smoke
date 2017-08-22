@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"flag"
-	"net/http"
 )
 
 func main() {
