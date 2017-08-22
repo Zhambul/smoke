@@ -12,14 +12,14 @@ import (
 
 func main() {
 	runDDL := flag.Bool("runDDL", false, "run ddl?")
-	webhook := flag.String("host", "", "host to enable webhook")
+	//webhook := flag.String("host", "", "host to enable webhook")
 	flag.Parse()
 	db.Init(*runDDL)
 
 	bot.Init(os.Getenv("TOKEN"))
-
-	if *webhook != "" {
-		if err := bot.EnableWebhook(*webhook); err != nil {
+	host := os.Getenv("HOST")
+	if host != "" {
+		if err := bot.EnableWebhook(host); err != nil {
 			panic(err)
 		}
 	}
