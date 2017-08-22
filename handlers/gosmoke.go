@@ -110,10 +110,6 @@ func (h *GoSmokeGroupHandler) Handle(c *bot.Context) *bot.Response {
 
 func setCreatorButtons(sr *bot.Response, s *smoke.Smoke) {
 	sr.ClearButtons()
-	a := &AnswerHandler{
-		Smoke: s,
-	}
-	sr.AddButtonRow(&bot.Button{Handler: a, Text: "Да"}, &bot.Button{Handler: a, Text: "Нет"})
 	sr.AddButtonString("Изменить время", &ChangeTimeHandlerStart{
 		Smoke: s,
 	})
@@ -150,7 +146,7 @@ func (h *ChangeTimeHandlerStart) Handle(c *bot.Context) *bot.Response {
 	r.AddButtonRow(h.changeTimeButton(5), h.changeTimeButton(10), h.changeTimeButton(15))
 	r.AddButtonRow(h.changeTimeButton(20), h.changeTimeButton(30), h.changeTimeButton(40))
 	r.AddButtonString("Отменить", &ChangeTimeHandlerCancel{
-		Smoke: h.Smoke,
+		Smoke:h.Smoke,
 	})
 	return r
 }
