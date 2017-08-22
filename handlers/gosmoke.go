@@ -149,7 +149,9 @@ func (h *ChangeTimeHandlerStart) Handle(c *bot.Context) *bot.Response {
 	})
 	r.AddButtonRow(h.changeTimeButton(5), h.changeTimeButton(10), h.changeTimeButton(15))
 	r.AddButtonRow(h.changeTimeButton(20), h.changeTimeButton(30), h.changeTimeButton(40))
-	r.AddButtonString("Отменить", &ChangeTimeHandlerCancel{})
+	r.AddButtonString("Отменить", &ChangeTimeHandlerCancel{
+		Smoke: h.Smoke,
+	})
 	return r
 }
 
