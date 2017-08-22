@@ -117,13 +117,46 @@ func (h *ReplyHandler) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.SetComment(c.BotAccount, c.Message.Text)
 	return nil
 }
+
 type ChangeTimeHandlerStart struct {
 	Smoke *smoke.Smoke
 }
 
 func (h *ChangeTimeHandlerStart) Handle(c *bot.Context) *bot.Response {
-	go h.Smoke.Cancel()
+	r := c.CurrentResponse
+	r.Text = "Через сколько минут?"
+	r.ClearButtons()
+	r.AddButton(&bot.Button{
+		Text: "Сейчас",
+		Handler: &ChangeTimeHandlerEnd{
+			min:   0,
+			Smoke: h.Smoke,
+		},
+	})
+	r.AddButtonRow(h.changeTimeButton(5), h.changeTimeButton(10), h.changeTimeButton(15))
+	r.AddButtonRow(h.changeTimeButton(20), h.changeTimeButton(30), h.changeTimeButton(40))
+	r.AddButtonString("Отменить", &StartHandler{})
 	return nil
+}
+
+type ChangeTimeHandlerEnd struct {
+	Smoke *smoke.Smoke
+	min   int
+}
+
+func (h *ChangeTimeHandlerEnd) Handle(c *bot.Context) *bot.Response {
+	h.Smoke.ChangeTime(h.min)
+	return nil
+}
+
+func (h *ChangeTimeHandlerStart) changeTimeButton(min int) *bot.Button {
+	return &bot.Button{
+		Text: strconv.Itoa(min),
+		Handler: &ChangeTimeHandlerEnd{
+			min:   min,
+			Smoke: h.Smoke,
+		},
+	}
 }
 
 type CancelSmokeHandler struct {
