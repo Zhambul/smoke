@@ -17,11 +17,6 @@ func main() {
 	flag.Parse()
 	db.Init(*runDDL)
 
-	http.HandleFunc("/hi", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Hi START")
-		log.Println("Hi END")
-		w.Write([]byte("Hi!"))
-	})
 	bot.Init(os.Getenv("TOKEN"))
 	host := os.Getenv("HOST")
 	if host != "" {
