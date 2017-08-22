@@ -11,7 +11,6 @@ type MenuHandler struct {
 
 func (t *MenuHandler) Handle(c *bot.Context) *bot.Response {
 	log.Println("MenuHandler START")
-	c.NextHandler = nil
 	groups, err := db.GetGroupsByAccount(toDomainAccount(c.BotAccount))
 	if err != nil {
 		log.Printf("ERROR: %v\n", err)
