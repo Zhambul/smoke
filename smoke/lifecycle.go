@@ -7,11 +7,6 @@ import (
 
 func (s *Smoke) lifecycle() {
 	log.Println("Smoke::lifecycle START")
-	if s.min == 0 {
-		log.Println("Smoke::lifecycle END")
-		go s.delayedCancel(10)
-		return
-	}
 	t := time.NewTicker(1 * time.Minute)
 	for {
 		select {
@@ -45,18 +40,17 @@ func (s *Smoke) tick() (end bool) {
 }
 
 func (s *Smoke) onFiveMinutes() {
+	log.Println("On five minutes")
 	if s.goingSmokers() > 1 {
 		go s.notifyAll("Группа *" + s.group.Name + "* выходит через 5 минут")
 	}
 }
 
 func (s *Smoke) onZeroMinutes() {
+	log.Println("On zero minutes")
 	if s.goingSmokers() > 1 {
 		log.Println("Group's going")
 		go s.notifyAll("Группа *" + s.group.Name + "* выходит")
-		go s.delayedCancel(10)
-	} else {
-		log.Println("Group's not going")
-		go s.Cancel()
 	}
+	go s.delayedCancel(10)
 }
