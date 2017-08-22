@@ -6,6 +6,7 @@ import (
 	"sync"
 	"log"
 	"smoke3/util"
+	"strconv"
 )
 
 type SmokerContext struct {
@@ -84,7 +85,8 @@ func (s *Smoke) ChangeTime(min int) {
 	s.min = min
 	s.cancelLifecycle = make(chan bool)
 	go s.lifecycle()
-	go s.update()
+	go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
+		"* изменил время на *"+ strconv.Itoa(min)+ "* минут", s.CreatorSC.Account.ChatId)
 }
 
 func (s *Smoke) Cancel() {
