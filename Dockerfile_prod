@@ -5,5 +5,5 @@ COPY ./lib/TelegramBot-library /go/src/bot
 WORKDIR /go/src/smoke3
 RUN go get
 RUN go install
-EXPOSE 80
+EXPOSE 443
 CMD ["smoke3"]
