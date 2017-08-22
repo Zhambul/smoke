@@ -107,11 +107,17 @@ func (s *Smoke) ChangeTime(min int) {
 	s.min = min
 	s.cancelLifecycle = make(chan bool)
 	go s.lifecycle()
-	go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
-		"* изменил время на *"+ strconv.Itoa(min)+ "* минут", s.CreatorSC.Account.ChatId)
+	if min <= 0 {
+		go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
+			"* изменил время на *"+ strconv.Itoa(min)+ "* минут", s.CreatorSC.Account.ChatId)
+	} else {
+		go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
+			"* изменил время на *сейчас*", s.CreatorSC.Account.ChatId)
+
+	}
 }
 
-func (s *Smoke) Cancel() {
+func (s *Smoke) Cancel(notify bool) {
 	log.Println("Smoke::Cancel START")
 	log.Println("Smoke::lock")
 	s.lock.Lock()
@@ -122,6 +128,11 @@ func (s *Smoke) Cancel() {
 	}()
 	for _, sc := range s.SCs {
 		go sc.Context.DeleteResponse(sc.PostResponse)
+	}
+
+	if notify {
+		go s.updateWithNotify("*"+s.CreatorSC.Account.FirstName+"* отменил",
+			s.CreatorSC.Account.ChatId)
 	}
 }
 
