@@ -107,7 +107,7 @@ func (s *Smoke) ChangeTime(min int) {
 	s.min = min
 	s.cancelLifecycle = make(chan bool)
 	go s.lifecycle()
-	if min <= 0 {
+	if s.min <= 0 {
 		go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
 			"* изменил время на *"+ strconv.Itoa(min)+ "* минут", s.CreatorSC.Account.ChatId)
 	} else {
