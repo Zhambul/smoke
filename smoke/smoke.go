@@ -126,6 +126,7 @@ func (s *Smoke) Cancel(notify bool) {
 		s.lock.Unlock()
 		log.Println("Smoke::Cancel END")
 	}()
+	s.cancelLifecycle <- true
 	for _, sc := range s.SCs {
 		go sc.Context.DeleteResponse(sc.PostResponse)
 	}
