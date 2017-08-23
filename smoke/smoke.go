@@ -76,20 +76,24 @@ func (s *Smoke) getUniqueUserName(acc *domain.Account) string {
 }
 
 func (s *Smoke) LockUserUpdate(acc *bot.BotAccount) {
+	log.Println("Smoke::lock")
 	s.lock.Lock()
 	if s.SCs[acc.ChatId].Locked {
 		panic("user update is already locked")
 	}
 	s.SCs[acc.ChatId].Locked = true
+	log.Println("Smoke::unlock")
 	s.lock.Unlock()
 }
 
 func (s *Smoke) UnlockUserUpdate(acc *bot.BotAccount) {
+	log.Println("Smoke::lock")
 	s.lock.Lock()
 	if !s.SCs[acc.ChatId].Locked {
 		panic("user update is already unlocked")
 	}
 	s.SCs[acc.ChatId].Locked = false
+	log.Println("Smoke::unlock")
 	s.lock.Unlock()
 }
 
@@ -125,7 +129,7 @@ func (s *Smoke) ChangeTime(min int) {
 func (s *Smoke) Cancel(notify bool) {
 	log.Println("Smoke::Cancel START")
 	log.Println("Smoke::lock")
-	s.lock.Lock()
+	s.loc.Lock()
 	defer func() {
 		log.Println("Smoke::unlock")
 		s.lock.Unlock()
