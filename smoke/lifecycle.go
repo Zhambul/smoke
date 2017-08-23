@@ -30,7 +30,7 @@ func (s *Smoke) tick() (end bool) {
 		s.onFiveMinutes()
 	}
 
-	if s.min <= 0 {
+	if s.min == 0 {
 		s.onZeroMinutes()
 		end = true
 	}
