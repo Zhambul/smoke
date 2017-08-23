@@ -105,15 +105,16 @@ func (s *Smoke) ChangeTime(min int) {
 		log.Println("not canceling delayed cancel")
 	}
 	s.min = min
-	s.cancelLifecycle = make(chan bool)
 	go s.lifecycle()
+	log.Printf("Smoke::ChangeTime. min - %v\n", s.min)
 	if s.min <= 0 {
 		go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
-			"* изменил время на *"+ strconv.Itoa(min)+ "* минут", s.CreatorSC.Account.ChatId)
+			"* изменил время на *"+ strconv.Itoa(s.min)+ "* минут", s.CreatorSC.Account.ChatId)
 	} else {
 		go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
 			"* изменил время на *сейчас*", s.CreatorSC.Account.ChatId)
 	}
+	log.Println("Smoke::ChangeTime END")
 }
 
 func (s *Smoke) Cancel(notify bool) {
