@@ -128,11 +128,7 @@ func (s *Smoke) ChangeTime(min int) {
 
 func (s *Smoke) Cancel(notify bool) {
 	log.Println("Smoke::Cancel START")
-	log.Println("Smoke::lock")
-	s.lock.Lock()
 	defer func() {
-		log.Println("Smoke::unlock")
-		s.lock.Unlock()
 		log.Println("Smoke::Cancel END")
 	}()
 	s.cancelLifecycle <- true
