@@ -38,7 +38,7 @@ func (s *Smoke) Format() string {
 	log.Println("Smoke::Format START")
 	var when string
 	if s.min < 1 {
-		when = "сейчас"
+		when = "*сейчас*"
 	} else {
 		when = "через *" + strconv.Itoa(s.min) + "* минут"
 	}
