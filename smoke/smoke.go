@@ -109,10 +109,10 @@ func (s *Smoke) ChangeTime(min int) {
 	log.Printf("Smoke::ChangeTime. min - %v\n", s.min)
 	if s.min <= 0 {
 		go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
-			"* изменил время на *"+ strconv.Itoa(s.min)+ "* минут", s.CreatorSC.Account.ChatId)
+			"* изменил время на *сейчас*", s.CreatorSC.Account.ChatId)
 	} else {
 		go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
-			"* изменил время на *сейчас*", s.CreatorSC.Account.ChatId)
+			"* изменил время на *"+ strconv.Itoa(s.min)+ "* минут", s.CreatorSC.Account.ChatId)
 	}
 	log.Println("Smoke::ChangeTime END")
 }
