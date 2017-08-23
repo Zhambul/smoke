@@ -7,20 +7,24 @@ import (
 
 func (s *Smoke) lifecycle() {
 	log.Println("Smoke::lifecycle START")
+	s.lifecycleEnabled = true
 	t := time.NewTicker(1 * time.Minute)
 	for {
 		select {
 		case <-t.C:
 			log.Println("Smoke::lifecycle. Tick")
 			if end := s.tick(); end {
+				s.lifecycleEnabled = false
 				log.Println("Smoke::lifecycle END")
 				return
 			}
 		case <-s.cancelLifecycle:
+			s.lifecycleEnabled = false
 			log.Println("Smoke::lifecycle END. Cancel")
 			return
 		}
 	}
+	s.lifecycleEnabled = false
 	log.Println("Smoke::lifecycle END")
 }
 

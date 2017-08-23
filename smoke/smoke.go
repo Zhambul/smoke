@@ -25,6 +25,7 @@ type Smoke struct {
 	cancelLifecycle      chan bool
 	cancelDelayedCancel  chan bool
 	delayedCancelEnabled bool
+	lifecycleEnabled     bool
 	SCs                  map[int]*SmokerContext
 	CreatorSC            *SmokerContext
 	lock                 sync.Mutex
@@ -128,10 +129,16 @@ func (s *Smoke) ChangeTime(min int) {
 
 func (s *Smoke) Cancel(notify bool) {
 	log.Println("Smoke::Cancel START")
+	log.Println("Smoke::lock")
+	s.lock.Lock()
 	defer func() {
+		log.Println("Smoke::unlock")
+		s.lock.Unlock()
 		log.Println("Smoke::Cancel END")
 	}()
-	s.cancelLifecycle <- true
+	if s.lifecycleEnabled {
+		s.cancelLifecycle <- true
+	}
 	for _, sc := range s.SCs {
 		go sc.Context.DeleteResponse(sc.PostResponse)
 	}
