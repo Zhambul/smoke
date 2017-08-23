@@ -129,7 +129,7 @@ func (s *Smoke) ChangeTime(min int) {
 func (s *Smoke) Cancel(notify bool) {
 	log.Println("Smoke::Cancel START")
 	log.Println("Smoke::lock")
-	s.loc.Lock()
+	s.lock.Lock()
 	defer func() {
 		log.Println("Smoke::unlock")
 		s.lock.Unlock()
