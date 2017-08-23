@@ -77,14 +77,19 @@ func (s *Smoke) getUniqueUserName(acc *domain.Account) string {
 
 func (s *Smoke) LockUserUpdate(acc *bot.BotAccount) {
 	s.lock.Lock()
+	if s.SCs[acc.ChatId].Locked {
+		panic("user update is already locked")
+	}
 	s.SCs[acc.ChatId].Locked = true
 	s.lock.Unlock()
 }
 
 func (s *Smoke) UnlockUserUpdate(acc *bot.BotAccount) {
 	s.lock.Lock()
+	if !s.SCs[acc.ChatId].Locked {
+		panic("user update is already unlocked")
+	}
 	s.SCs[acc.ChatId].Locked = false
-	//go s.update()
 	s.lock.Unlock()
 }
 

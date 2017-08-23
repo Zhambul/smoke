@@ -6,7 +6,6 @@ import (
 	"bot/bot"
 	"strconv"
 	"smoke3/smoke"
-	"smoke3/util"
 	"strings"
 )
 
@@ -43,14 +42,14 @@ type ChooseTimeHandler struct {
 }
 
 func (h *ChooseTimeHandler) Handle(c *bot.Context) *bot.Response {
-	if len(h.group.Accounts) < 2 {
-		r := c.CurrentResponse
-		r.Text = "В группе *" + h.group.Name + "* кроме вас никого"
-		r.ClearButtons()
-		r.AddButton(util.ShareButton(h.group))
-		r.AddButtonString("Удалить", &DeleteGroupHandler{group: h.group})
-		return r
-	}
+	//if len(h.group.Accounts) < 2 {
+	//	r := c.CurrentResponse
+	//	r.Text = "В группе *" + h.group.Name + "* кроме вас никого"
+	//	r.ClearButtons()
+	//	r.AddButton(util.ShareButton(h.group))
+	//	r.AddButtonString("Удалить", &DeleteGroupHandler{group: h.group})
+	//	return r
+	//}
 
 	r := c.CurrentResponse
 	r.Text = "Через сколько минут?"
@@ -113,7 +112,7 @@ func setCreatorButtons(sr *bot.Response, s *smoke.Smoke) {
 	sr.AddButtonString("Изменить время", &ChangeTimeHandlerStart{
 		Smoke: s,
 	})
-	sr.AddButtonString("Отменить", &CancelSmokeHandler{
+	sr.AddButtonString("Отменить", &CancelSmokeHandlerStart{
 		Smoke: s,
 	})
 }
@@ -145,22 +144,25 @@ func (h *ChangeTimeHandlerStart) Handle(c *bot.Context) *bot.Response {
 	})
 	r.AddButtonRow(h.changeTimeButton(5), h.changeTimeButton(10), h.changeTimeButton(15))
 	r.AddButtonRow(h.changeTimeButton(20), h.changeTimeButton(30), h.changeTimeButton(40))
-	r.AddButtonString("Отменить", &ChangeTimeHandlerCancel{
-		Smoke:h.Smoke,
+	r.AddButtonString("Отменить", &CancelDialog{
+		Smoke: h.Smoke,
 	})
 	return r
 }
 
-type ChangeTimeHandlerCancel struct {
+type CancelDialog struct {
 	Smoke *smoke.Smoke
 }
 
-func (h *ChangeTimeHandlerCancel) Handle(c *bot.Context) *bot.Response {
+func (h *CancelDialog) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
 	r := c.CurrentResponse
-	r.Text = h.Smoke.Format()
-	setCreatorButtons(r, h.Smoke)
+	restoreCreatorResponse(r, h.Smoke)
 	return r
+}
+func restoreCreatorResponse(r *bot.Response, smoke *smoke.Smoke) {
+	r.Text = smoke.Format()
+	setCreatorButtons(r, smoke)
 }
 
 type ChangeTimeHandlerEnd struct {
@@ -186,13 +188,36 @@ func (h *ChangeTimeHandlerStart) changeTimeButton(min int) *bot.Button {
 	}
 }
 
-type CancelSmokeHandler struct {
+type CancelSmokeHandlerStart struct {
 	Smoke *smoke.Smoke
 }
 
-func (h *CancelSmokeHandler) Handle(c *bot.Context) *bot.Response {
+func (h *CancelSmokeHandlerStart) Handle(c *bot.Context) *bot.Response {
+	h.Smoke.LockUserUpdate(c.BotAccount)
+	r := c.CurrentResponse
+	r.ClearButtons()
+	r.Text = "Вы уверены, что хотите отменить?"
+	r.AddButtonString("Да", &CancelSmokeHandlerEnd{
+		Smoke: h.Smoke,
+	})
+	r.AddButtonString("Нет", &CancelDialog{
+		Smoke: h.Smoke,
+	})
+	return r
+}
+
+type CancelSmokeHandlerEnd struct {
+	Smoke *smoke.Smoke
+}
+
+func (h *CancelSmokeHandlerEnd) Handle(c *bot.Context) *bot.Response {
+	h.Smoke.UnlockUserUpdate(c.BotAccount)
 	go h.Smoke.Cancel(true)
 	return nil
+}
+
+type CancelSmokeHandlerCancel struct {
+	Smoke *smoke.Smoke
 }
 
 type AnswerHandler struct {
