@@ -68,17 +68,7 @@ type CancelDialog struct {
 
 func (h *CancelDialog) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
-	return restoreCreatorResponse(h.Smoke, c)
-}
-
-func (h *ChooseTimeHandler) goSmokeButton(min int) *bot.Button {
-	return &bot.Button{
-		Text: strconv.Itoa(min),
-		Handler: &GoSmokeGroupHandler{
-			min:   min,
-			group: h.group,
-		},
-	}
+	return restoreCreatorResponse(c.CurrentResponse, h.Smoke)
 }
 
 type GoSmokeGroupHandler struct {
@@ -144,16 +134,6 @@ func (h *ChangeTimeHandlerEnd) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.ChangeTime(h.min, c.BotAccount)
 	r := h.Smoke.CreatorSC.PostResponse
 	return restoreCreatorResponse(r, h.Smoke)
-}
-
-func (h *ChangeTimeHandlerStart) changeTimeButton(min int) *bot.Button {
-	return &bot.Button{
-		Text: strconv.Itoa(min),
-		Handler: &ChangeTimeHandlerEnd{
-			min:   min,
-			Smoke: h.Smoke,
-		},
-	}
 }
 
 type CancelSmokeHandlerStart struct {
