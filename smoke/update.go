@@ -103,12 +103,13 @@ func (s *Smoke) goingSmokers() int {
 	goingSmokers := 0
 	for _, sc := range s.SCs {
 		if sc.Going {
+			log.Printf("Smoke::goingSmokers. %v is going\n", sc)
 			goingSmokers++
 		}
 	}
 	log.Println("Smoke::unlock")
 	s.lock.Unlock()
-	log.Println("Smoke::goingSmokers END")
+	log.Printf("Smoke::goingSmokers END. %v\n", goingSmokers)
 	return goingSmokers
 }
 
@@ -148,12 +149,12 @@ func (s *Smoke) delayedCancel(min int) {
 		s.delayedCancelEnabled = false
 	}()
 	t := time.NewTicker(time.Duration(min) * time.Minute)
-	select{
-		case <-t.C:
-			log.Println("Smoke::delayedCancel END")
-			s.Cancel(false)
-		case <-s.cancelDelayedCancel:
-			log.Println("Smoke::delayedCancel END. cancelLifecycle")
-			return
+	select {
+	case <-t.C:
+		log.Println("Smoke::delayedCancel END")
+		s.Cancel(false)
+	case <-s.cancelDelayedCancel:
+		log.Println("Smoke::delayedCancel END. cancelLifecycle")
+		return
 	}
 }
