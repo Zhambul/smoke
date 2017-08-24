@@ -50,21 +50,25 @@ func (h *ChooseTimeHandler) Handle(c *bot.Context) *bot.Response {
 	//	r.AddButtonString("Удалить", &DeleteGroupHandler{group: h.group})
 	//	return r
 	//}
-
 	r := c.CurrentResponse
 	r.Text = "Через сколько минут?"
 	r.ClearButtons()
-	r.AddButton(&bot.Button{
-		Text: "Сейчас",
-		Handler: &GoSmokeGroupHandler{
-			min:   0,
+	setTimeButtons(r, func(min int) bot.Handler {
+		return &GoSmokeGroupHandler{
+			min:   min,
 			group: h.group,
-		},
-	})
-	r.AddButtonRow(h.goSmokeButton(5), h.goSmokeButton(10), h.goSmokeButton(15))
-	r.AddButtonRow(h.goSmokeButton(20), h.goSmokeButton(30), h.goSmokeButton(40))
-	r.AddButtonString("Отменить", &StartHandler{})
+		}
+	}, &StartHandler{})
 	return r
+}
+
+type CancelDialog struct {
+	Smoke *smoke.Smoke
+}
+
+func (h *CancelDialog) Handle(c *bot.Context) *bot.Response {
+	h.Smoke.UnlockUserUpdate(c.BotAccount)
+	return restoreCreatorResponse(h.Smoke, c)
 }
 
 func (h *ChooseTimeHandler) goSmokeButton(min int) *bot.Button {
@@ -84,37 +88,23 @@ type GoSmokeGroupHandler struct {
 
 func (h *GoSmokeGroupHandler) Handle(c *bot.Context) *bot.Response {
 	s := smoke.NewSmoke(h.group, c.BotAccount.ChatId, h.min)
-	c.CurrentResponse.ClearButtons()
-	s.SCs[c.BotAccount.ChatId].PostResponse = c.CurrentResponse
 
-	for _, smokerContext := range s.SCs {
-		a := &AnswerHandler{
-			Smoke: s,
+	r := c.CurrentResponse
+	r.ClearButtons()
+	setCreatorButtons(r, s)
+
+	s.SCs[c.BotAccount.ChatId].PostResponse = r
+
+	for _, sc := range s.SCs {
+		if sc.Account.ChatId == c.BotAccount.ChatId {
+			continue
 		}
 
-		sr := smokerContext.PostResponse
-		sr.AddButtonRow(&bot.Button{Handler: a, Text: "Да"}, &bot.Button{Handler: a, Text: "Нет"})
-
-		if smokerContext.Account.ChatId == c.BotAccount.ChatId {
-			setCreatorButtons(sr, s)
-		}
-
-		sr.ReplyHandler = &ReplyHandler{
-			Smoke: s,
-		}
+		setRegularButtons(sc.PostResponse, s)
 	}
+
 	go s.Start()
 	return nil
-}
-
-func setCreatorButtons(sr *bot.Response, s *smoke.Smoke) {
-	sr.ClearButtons()
-	sr.AddButtonString("Изменить время", &ChangeTimeHandlerStart{
-		Smoke: s,
-	})
-	sr.AddButtonString("Отменить", &CancelSmokeHandlerStart{
-		Smoke: s,
-	})
 }
 
 type ReplyHandler struct {
@@ -135,34 +125,13 @@ func (h *ChangeTimeHandlerStart) Handle(c *bot.Context) *bot.Response {
 	r := c.CurrentResponse
 	r.Text = "Через сколько минут?"
 	r.ClearButtons()
-	r.AddButton(&bot.Button{
-		Text: "Сейчас",
-		Handler: &ChangeTimeHandlerEnd{
-			min:   0,
+	setTimeButtons(r, func(min int) bot.Handler {
+		return &ChangeTimeHandlerEnd{
+			min:   min,
 			Smoke: h.Smoke,
-		},
-	})
-	r.AddButtonRow(h.changeTimeButton(5), h.changeTimeButton(10), h.changeTimeButton(15))
-	r.AddButtonRow(h.changeTimeButton(20), h.changeTimeButton(30), h.changeTimeButton(40))
-	r.AddButtonString("Отменить", &CancelDialog{
-		Smoke: h.Smoke,
-	})
+		}
+	}, &CancelDialog{h.Smoke})
 	return r
-}
-
-type CancelDialog struct {
-	Smoke *smoke.Smoke
-}
-
-func (h *CancelDialog) Handle(c *bot.Context) *bot.Response {
-	h.Smoke.UnlockUserUpdate(c.BotAccount)
-	r := c.CurrentResponse
-	restoreCreatorResponse(r, h.Smoke)
-	return r
-}
-func restoreCreatorResponse(r *bot.Response, smoke *smoke.Smoke) {
-	r.Text = smoke.Format()
-	setCreatorButtons(r, smoke)
 }
 
 type ChangeTimeHandlerEnd struct {
@@ -172,10 +141,9 @@ type ChangeTimeHandlerEnd struct {
 
 func (h *ChangeTimeHandlerEnd) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
-	h.Smoke.ChangeTime(h.min)
+	h.Smoke.ChangeTime(h.min, c.BotAccount)
 	r := h.Smoke.CreatorSC.PostResponse
-	setCreatorButtons(r, h.Smoke)
-	return nil
+	return restoreCreatorResponse(r, h.Smoke)
 }
 
 func (h *ChangeTimeHandlerStart) changeTimeButton(min int) *bot.Button {
@@ -195,14 +163,11 @@ type CancelSmokeHandlerStart struct {
 func (h *CancelSmokeHandlerStart) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.LockUserUpdate(c.BotAccount)
 	r := c.CurrentResponse
-	r.ClearButtons()
 	r.Text = "Вы уверены, что хотите отменить?"
-	r.AddButtonString("Да", &CancelSmokeHandlerEnd{
-		Smoke: h.Smoke,
-	})
-	r.AddButtonString("Нет", &CancelDialog{
-		Smoke: h.Smoke,
-	})
+	r.ClearButtons()
+	setYesNoButtons(r,
+		&CancelSmokeHandlerEnd{h.Smoke,},
+		&CancelDialog{h.Smoke})
 	return r
 }
 

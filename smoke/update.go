@@ -43,7 +43,7 @@ func (s *Smoke) Format() string {
 		when = "через *" + strconv.Itoa(s.min) + "* минут"
 	}
 
-	res := "*" + s.getUniqueUserName(s.CreatorSC.Account) + "* из группы *" +
+	res := "*" + s.GetUniqueUserName(s.CreatorSC.Account) + "* из группы *" +
 		s.group.Name + "*" + " вызывает " + when + "\n\n"
 
 	var keys []int
@@ -67,9 +67,9 @@ func (s *Smoke) Format() string {
 
 func (s *Smoke) answer(sc *SmokerContext) string {
 	if sc.Answered {
-		return s.getUniqueUserName(sc.Account) + " - " + boolToAnswer(sc.Going)
+		return s.GetUniqueUserName(sc.Account) + " - " + boolToAnswer(sc.Going)
 	}
-	return s.getUniqueUserName(sc.Account) + " - "
+	return s.GetUniqueUserName(sc.Account) + " - "
 }
 
 func (s *Smoke) comment(sc *SmokerContext) string {
@@ -79,20 +79,22 @@ func (s *Smoke) comment(sc *SmokerContext) string {
 	return ""
 }
 
-func (s *Smoke) notifyOne(msg string, smokerContext *SmokerContext) {
+func (s *Smoke) notifyOne(msg string, sc *SmokerContext) {
 	log.Println("Smoke::notifyOne START")
 
-	if !s.SCs[smokerContext.Account.ChatId].Going {
+	if !s.SCs[sc.Account.ChatId].Going {
 		return
 	}
+
+	log.Printf("Smoke::notifying msg - %v, %v\n", msg, sc)
 
 	r := &bot.Response{
 		Text: msg,
 	}
 
-	smokerContext.Context.Send(r)
+	sc.Context.Send(r)
 	time.Sleep(15 * time.Second)
-	smokerContext.Context.DeleteResponse(r)
+	sc.Context.DeleteResponse(r)
 	log.Println("Smoke::notifyOne END")
 }
 

@@ -65,7 +65,7 @@ func (s *Smoke) Start() {
 	go s.lifecycle()
 }
 
-func (s *Smoke) getUniqueUserName(acc *domain.Account) string {
+func (s *Smoke) GetUniqueUserName(acc *domain.Account) string {
 	for _, sc := range s.SCs {
 		if sc.Account.ChatId != acc.ChatId {
 			if sc.Account.FirstName == acc.FirstName {
@@ -98,7 +98,7 @@ func (s *Smoke) UnlockUserUpdate(acc *bot.BotAccount) {
 	s.lock.Unlock()
 }
 
-func (s *Smoke) ChangeTime(min int) {
+func (s *Smoke) ChangeTime(min int, acc *bot.BotAccount) {
 	log.Println("Smoke::ChangeTime START")
 	log.Println("Smoke::lock")
 	s.lock.Lock()
@@ -118,10 +118,10 @@ func (s *Smoke) ChangeTime(min int) {
 	go s.lifecycle()
 	log.Printf("Smoke::ChangeTime. min - %v\n", s.min)
 	if s.min <= 0 {
-		go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
-			"* изменил время на *сейчас*", s.CreatorSC.Account.ChatId)
+		go s.updateWithNotify("*" + acc.FirstName+
+			"* изменил время на *сейчас*", acc.ChatId)
 	} else {
-		go s.updateWithNotify("*" + s.CreatorSC.Account.FirstName+
+		go s.updateWithNotify("*" + acc.FirstName+
 			"* изменил время на *"+ strconv.Itoa(s.min)+ "* минут", s.CreatorSC.Account.ChatId)
 	}
 	log.Println("Smoke::ChangeTime END")
