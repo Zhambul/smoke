@@ -39,6 +39,13 @@ func askCreator(h *SuggestTimeHandlerEnd, c *bot.Context) {
 	h.Smoke.LockUserUpdate(util.ToBotAccount(h.Smoke.CreatorSC.Account))
 	cc := h.Smoke.CreatorSC.Context
 	cr := cc.CurrentResponse
+	if h == nil {
+		panic("h is nil")
+	}
+	if h.Smoke == nil {
+		panic("h.Smoke is nil")
+	}
+
 	cr.Text = fmt.Sprintf("*%v* предлагает через *%v* минут",
 		h.Smoke.GetUniqueUserName(toDomainAccount(c.BotAccount)),
 		h.min)
