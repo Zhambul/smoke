@@ -24,8 +24,14 @@ func timeButton(min int, getHandler func(min int) bot.Handler) *bot.Button {
 }
 
 func setYesNoButtons(r *bot.Response, yesHandler bot.Handler, noHandler bot.Handler) {
-	r.AddButtonString("Да", yesHandler)
-	r.AddButtonString("Нет", noHandler)
+	r.AddButtonRow(&bot.Button{
+		Text:"Да",
+		Handler:yesHandler,
+	},
+		&bot.Button{
+		Text:"Нет",
+		Handler:noHandler,
+	})
 }
 
 func setCreatorButtons(r *bot.Response, s *smoke.Smoke) {
