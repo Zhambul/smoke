@@ -35,10 +35,11 @@ func (h *SuggestTimeHandlerEnd) Handle(c *bot.Context) *bot.Response {
 	askCreator(h, c)
 	return restoreRegularResponse(c.CurrentResponse, h.Smoke)
 }
+
 func askCreator(h *SuggestTimeHandlerEnd, c *bot.Context) {
 	h.Smoke.LockUserUpdate(util.ToBotAccount(h.Smoke.CreatorSC.Account))
 	cc := h.Smoke.CreatorSC.Context
-	cr := cc.CurrentResponse
+	cr := h.Smoke.CreatorSC.PostResponse
 
 	if cr == nil {
 		panic("cr is nil")
