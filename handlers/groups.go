@@ -6,6 +6,8 @@ import (
 	"smoke3/domain"
 	"log"
 	"smoke3/util"
+	"strings"
+	"errors"
 )
 
 type GroupsHandler struct {
@@ -62,15 +64,37 @@ type GiveGroupNameHandlerEnd struct {
 }
 
 func (h *GiveGroupNameHandlerEnd) Handle(c *bot.Context) *bot.Response {
-	h.group.Name = c.Message.Text
+	r := c.CurrentResponse
+	r.ClearButtons()
+
+	newGroupName, err := validateGroupName(c.Message.Text)
+	if err != nil {
+		r.Text = "Ошибка"
+		return r
+	}
+	h.group.Name = newGroupName
 	if err := db.ChangeGroupName(h.group); err != nil {
 		log.Printf("ERROR: %v\n", err)
 	}
-	r := c.CurrentResponse
-	r.ClearButtons()
+
 	r.Text = "Название изменено на *" + c.Message.Text + "*"
 	r.AddButtonString("Назад", h.back)
 	return r
+}
+
+func validateGroupName(name string) (string, error) {
+	newName := strings.TrimSpace(name)
+
+	if len(newName) > 50 {
+		return "", errors.New("too long")
+	}
+
+	if len(newName) < 1 {
+		return "", errors.New("too short")
+	}
+
+	//strings.a
+	return newName, nil
 }
 
 type SetGroupNameHandler struct {
@@ -78,7 +102,15 @@ type SetGroupNameHandler struct {
 
 func (h *SetGroupNameHandler) Handle(c *bot.Context) *bot.Response {
 	log.Println("SetGroupNameHandler START")
-	groupName := c.Message.Text
+
+	r := &bot.Response{}
+
+	groupName, err := validateGroupName(c.Message.Text)
+	if err != nil {
+		r.Text = "Ошибка"
+		return r
+	}
+
 	g, err := db.CreateNewGroup(toDomainAccount(c.BotAccount), groupName)
 	if err != nil {
 		if err == db.NotUnique {
@@ -91,10 +123,8 @@ func (h *SetGroupNameHandler) Handle(c *bot.Context) *bot.Response {
 		}
 	}
 
-	r := &bot.Response{
-		Text: "Группа *" + groupName + "* создана",
-	}
 
+	r.Text = "Группа *" + groupName + "* создана"
 	r.AddButton(util.ShareButton(g))
 	r.AddButtonString("Назад", &MenuHandler{})
 	log.Printf("SetGroupNameHandler END + %+v\n", r)
