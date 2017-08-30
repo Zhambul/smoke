@@ -5,6 +5,7 @@ import (
 	"smoke3/smoke"
 	"smoke3/util"
 	"fmt"
+	"strconv"
 )
 
 type SuggestTimeHandlerStart struct {
@@ -32,7 +33,7 @@ type SuggestTimeHandlerEnd struct {
 
 func (h *SuggestTimeHandlerEnd) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
-	go h.Smoke.NotifyOne("Предложение отправлено", h.Smoke.CreatorSC)
+	go h.Smoke.NotifyOne("Предложение изменить на "+strconv.Itoa(h.min)+" минут отправлено", h.Smoke.CreatorSC)
 	go askCreator(h, c)
 	return restoreRegularResponse(c.CurrentResponse, h.Smoke)
 }
