@@ -1,13 +1,13 @@
 package main
 
 import (
-	"smoke3/handlers"
-	"smoke3/db"
 	"bot/bot"
-	"strings"
+	"flag"
 	"log"
 	"os"
-	"flag"
+	"smoke3/db"
+	"smoke3/handlers"
+	"strings"
 )
 
 func main() {
@@ -60,7 +60,7 @@ func (h *ShareGroupInlineHandler) Handle(c *bot.Context) *bot.InlineAnswer {
 	a.Description = "Нажмите сюда, чтобы поделиться группой"
 	a.Button = &bot.Button{
 		Text: "Присоедениться",
-		URL:  "https://telegram.me/vaping_smoking_bot?start=" + g.UUID,
+		URL:  "https://telegram.me/jumblu_bot?start=" + g.UUID,
 	}
 	log.Println("ShareGroupInlineHandler END")
 	return a

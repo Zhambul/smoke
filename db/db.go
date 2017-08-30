@@ -1,13 +1,14 @@
 package db
 
 import (
-	"os"
 	"database/sql"
 	"fmt"
-	"time"
-	"log"
-	_ "github.com/lib/pq"
 	"io/ioutil"
+	"log"
+	"os"
+	"time"
+
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
