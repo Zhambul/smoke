@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"bot/bot"
+	"fmt"
 	"smoke3/smoke"
 	"smoke3/util"
-	"fmt"
 	"strconv"
 )
 
@@ -33,9 +33,9 @@ type SuggestTimeHandlerEnd struct {
 
 func (h *SuggestTimeHandlerEnd) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
-	go h.Smoke.NotifyOne("Предложение изменить на "+strconv.Itoa(h.min)+" минут отправлено", h.Smoke.CreatorSC)
+	go h.Smoke.NotifyOne("Предложение изменить на "+strconv.Itoa(h.min)+" минут отправлено", h.Smoke.CreatorSC, true)
 	go askCreator(h, c)
-	return restoreRegularResponse(c.CurrentResponse, h.Smoke)
+	return restoreRegularResponse(c.CurrentResponse, h.Smoke, c.BotAccount.ChatId)
 }
 
 func askCreator(h *SuggestTimeHandlerEnd, c *bot.Context) {
@@ -52,7 +52,7 @@ func askCreator(h *SuggestTimeHandlerEnd, c *bot.Context) {
 		Suggester: c.BotAccount,
 	}, &CancelDialog{h.Smoke})
 
-	go h.Smoke.NotifyOne("!", h.Smoke.CreatorSC)
+	go h.Smoke.NotifyOne("!", h.Smoke.CreatorSC, true)
 
 	cc.Send(cr)
 }

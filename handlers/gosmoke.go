@@ -1,10 +1,11 @@
 package handlers
 
 import (
+	"bot/bot"
 	"smoke3/db"
 	"smoke3/domain"
-	"bot/bot"
 	"smoke3/smoke"
+	"smoke3/util"
 	"strings"
 )
 
@@ -88,8 +89,7 @@ func (h *GoSmokeGroupHandler) Handle(c *bot.Context) *bot.Response {
 		if sc.Account.ChatId == c.BotAccount.ChatId {
 			continue
 		}
-
-		setRegularButtons(sc.PostResponse, s)
+		setRegularButtons(sc.PostResponse, s, sc.Account.ChatId)
 	}
 
 	go s.Start()
@@ -145,7 +145,7 @@ func (h *CancelSmokeHandlerStart) Handle(c *bot.Context) *bot.Response {
 	r.Text = "Вы уверены, что хотите отменить?"
 	r.ClearButtons()
 	setYesNoButtons(r,
-		&CancelSmokeHandlerEnd{h.Smoke,},
+		&CancelSmokeHandlerEnd{h.Smoke},
 		&CancelDialog{h.Smoke})
 	return r
 }
@@ -190,4 +190,43 @@ func toDomainAccount(botAcc *bot.BotAccount) *domain.Account {
 		panic(err)
 	}
 	return acc
+}
+
+type AskForCigaHandler struct {
+	Smoke        *smoke.Smoke
+	RequesterCtx *smoke.SmokerContext
+}
+
+func (h *AskForCigaHandler) Handle(c *bot.Context) *bot.Response {
+	go h.Smoke.NotifyOne("Ищем сигаретку", h.RequesterCtx, false)
+	go askSmokersForCiga(h)
+	return nil
+}
+
+func askSmokersForCiga(h *AskForCigaHandler) {
+	options := make(map[string]bot.Handler)
+	options["стрельнуть"] = &AnswerToCigaHandler{Smoke: h.Smoke, RequesterCtx: h.RequesterCtx}
+	options["отказать"] = &CancelDialog{h.Smoke}
+
+	for _, smokerContext := range h.Smoke.SCs {
+		if smokerContext.Account.ChatId == h.RequesterCtx.Account.ChatId {
+			continue
+		}
+		h.Smoke.LockUserUpdate(util.ToBotAccount(smokerContext.Account))
+		go h.Smoke.AskOne(h.RequesterCtx.Account.FirstName+" просит стрельнуть сигарету", options, smokerContext)
+		go h.Smoke.NotifyOne("!", smokerContext, true)
+	}
+
+}
+
+type AnswerToCigaHandler struct {
+	Smoke        *smoke.Smoke
+	RequesterCtx *smoke.SmokerContext
+}
+
+func (h *AnswerToCigaHandler) Handle(c *bot.Context) *bot.Response {
+	h.Smoke.UnlockUserUpdate(c.BotAccount)
+	go h.Smoke.NotifyOne(h.RequesterCtx.Account.FirstName+" искренне благодарен", h.Smoke.SCs[c.BotAccount.ChatId], true)
+	go h.Smoke.NotifyOne(c.BotAccount.FirstName+"согласился стрельнуть сигарету", h.RequesterCtx, false)
+	return restoreRegularResponse(c.CurrentResponse, h.Smoke, c.BotAccount.ChatId)
 }

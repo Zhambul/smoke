@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"bot/bot"
-	"strconv"
 	"smoke3/smoke"
+	"strconv"
 )
 
 func setTimeButtons(r *bot.Response, getHandler func(min int) bot.Handler, cancelHandler bot.Handler) {
@@ -25,13 +25,13 @@ func timeButton(min int, getHandler func(min int) bot.Handler) *bot.Button {
 
 func setYesNoButtons(r *bot.Response, yesHandler bot.Handler, noHandler bot.Handler) {
 	r.AddButtonRow(&bot.Button{
-		Text:"Да",
-		Handler:yesHandler,
+		Text:    "Да",
+		Handler: yesHandler,
 	},
 		&bot.Button{
-		Text:"Нет",
-		Handler:noHandler,
-	})
+			Text:    "Нет",
+			Handler: noHandler,
+		})
 }
 
 func setCreatorButtons(r *bot.Response, s *smoke.Smoke) {
@@ -40,19 +40,20 @@ func setCreatorButtons(r *bot.Response, s *smoke.Smoke) {
 	r.ReplyHandler = &ReplyHandler{s}
 }
 
-func setRegularButtons(r *bot.Response, s *smoke.Smoke) {
+func setRegularButtons(r *bot.Response, s *smoke.Smoke, chatId int) {
 	a := &AnswerHandler{
 		Smoke: s,
 	}
 	setYesNoButtons(r, a, a)
+	r.AddButtonString("Попросить стрельнуть", &AskForCigaHandler{Smoke: s, RequesterCtx: s.SCs[chatId]})
 	r.AddButtonString("Предложить другое время", &SuggestTimeHandlerStart{s})
 	r.ReplyHandler = &ReplyHandler{s}
 }
 
-func restoreRegularResponse(r *bot.Response, s *smoke.Smoke) *bot.Response{
+func restoreRegularResponse(r *bot.Response, s *smoke.Smoke, chatId int) *bot.Response {
 	r.Text = s.Format()
 	r.ClearButtons()
-	setRegularButtons(r, s)
+	setRegularButtons(r, s, chatId)
 	return r
 }
 
