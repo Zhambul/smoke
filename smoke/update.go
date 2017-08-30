@@ -106,11 +106,9 @@ func (s *Smoke) AskOne(msg string, resposeOptions map[string]bot.Handler, sc *Sm
 	}
 
 	log.Printf("Smoke::ask msg - %v, %v\n", msg, sc)
-
-	r := &bot.Response{
-		Text: msg,
-	}
-
+	r := sc.PostResponse
+	r.Text = msg
+	r.ClearButtons()
 	for label, handler := range resposeOptions {
 		r.AddButton(&bot.Button{
 			Text:    label,

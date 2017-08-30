@@ -227,6 +227,6 @@ type AnswerToCigaHandler struct {
 func (h *AnswerToCigaHandler) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
 	go h.Smoke.NotifyOne(h.RequesterCtx.Account.FirstName+" искренне благодарен", h.Smoke.SCs[c.BotAccount.ChatId], true)
-	go h.Smoke.NotifyOne(c.BotAccount.FirstName+"согласился стрельнуть сигарету", h.RequesterCtx, false)
-	return restoreRegularResponse(c.CurrentResponse, h.Smoke, c.BotAccount.ChatId)
+	go h.Smoke.NotifyOne(c.BotAccount.FirstName+" согласился стрельнуть сигарету", h.RequesterCtx, false)
+	return restoreCreatorResponse(c.CurrentResponse, h.Smoke)
 }
