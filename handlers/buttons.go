@@ -36,8 +36,8 @@ func setYesNoButtons(r *bot.Response, yesHandler bot.Handler, noHandler bot.Hand
 
 func setCreatorButtons(r *bot.Response, s *smoke.Smoke, chatId int) {
 	r.AddButtonString("Изменить время", &ChangeTimeHandlerStart{s})
-	r.AddButtonString("Отменить", &CancelSmokeHandlerStart{s})
 	r.AddButtonString("Попросить стрельнуть", &AskForCigaHandler{Smoke: s, RequesterCtx: s.SCs[chatId]})
+	r.AddButtonString("Отменить", &CancelSmokeHandlerStart{s})
 	r.ReplyHandler = &ReplyHandler{s}
 }
 
