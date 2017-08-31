@@ -27,7 +27,7 @@ func (s *Smoke) updateWithNotify(msg string, omitChatId int) {
 		go sc.Context.Send(r)
 		if msg != "" {
 			if sc.Account.ChatId != omitChatId {
-				go s.NotifyOne(msg, sc, true)
+				go s.NotifyOne(msg, sc.Account.ChatId, true)
 			}
 		}
 	}
@@ -79,10 +79,11 @@ func (s *Smoke) comment(sc *SmokerContext) string {
 	return ""
 }
 
-func (s *Smoke) NotifyOne(msg string, sc *SmokerContext, onlyGoing bool) {
+func (s *Smoke) NotifyOne(msg string, chatId int, onlyGoing bool) {
 	log.Println("Smoke::NotifyOne START")
 
-	if onlyGoing && !s.SCs[sc.Account.ChatId].Going {
+	sc := s.SCs[chatId]
+	if onlyGoing && !sc.Going {
 		return
 	}
 
@@ -158,11 +159,11 @@ func (s *Smoke) notifyAll(msg string) {
 }
 
 func (s *Smoke) notifyAllExcept(msg string, omitChatId int) {
-	for _, smokerContext := range s.SCs {
-		if smokerContext.Account.ChatId == omitChatId || !smokerContext.Going {
+	for _, sc := range s.SCs {
+		if sc.Account.ChatId == omitChatId || !sc.Going {
 			continue
 		}
-		go s.NotifyOne(msg, smokerContext, true)
+		go s.NotifyOne(msg, sc.Account.ChatId, true)
 	}
 }
 

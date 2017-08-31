@@ -198,7 +198,7 @@ type AskForCigaHandler struct {
 }
 
 func (h *AskForCigaHandler) Handle(c *bot.Context) *bot.Response {
-	go h.Smoke.NotifyOne("Ищем сигаретку", h.RequesterCtx, false)
+	go h.Smoke.NotifyOne("Ищем сигаретку", h.RequesterCtx.Account.ChatId, false)
 	go askSmokersForCiga(h)
 	return nil
 }
@@ -208,13 +208,13 @@ func askSmokersForCiga(h *AskForCigaHandler) {
 	options["стрельнуть"] = &AnswerToCigaHandler{Smoke: h.Smoke, RequesterCtx: h.RequesterCtx}
 	options["отказать"] = &CancelDialog{h.Smoke}
 
-	for _, smokerContext := range h.Smoke.SCs {
-		if smokerContext.Account.ChatId == h.RequesterCtx.Account.ChatId {
+	for _, sc := range h.Smoke.SCs {
+		if sc.Account.ChatId == h.RequesterCtx.Account.ChatId {
 			continue
 		}
-		h.Smoke.LockUserUpdate(util.ToBotAccount(smokerContext.Account))
-		go h.Smoke.AskOne(h.RequesterCtx.Account.FirstName+" просит стрельнуть сигарету", options, smokerContext)
-		go h.Smoke.NotifyOne("!", smokerContext, true)
+		h.Smoke.LockUserUpdate(util.ToBotAccount(sc.Account))
+		go h.Smoke.AskOne(h.RequesterCtx.Account.FirstName+" просит стрельнуть сигарету", options, sc)
+		go h.Smoke.NotifyOne("!", sc.Account.ChatId, true)
 	}
 
 }
@@ -226,7 +226,7 @@ type AnswerToCigaHandler struct {
 
 func (h *AnswerToCigaHandler) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
-	go h.Smoke.NotifyOne(h.RequesterCtx.Account.FirstName+" искренне благодарен", h.Smoke.SCs[c.BotAccount.ChatId], true)
-	go h.Smoke.NotifyOne(c.BotAccount.FirstName+" согласился стрельнуть сигарету", h.RequesterCtx, false)
+	go h.Smoke.NotifyOne(h.RequesterCtx.Account.FirstName+" искренне благодарен", c.BotAccount.ChatId, true)
+	go h.Smoke.NotifyOne(c.BotAccount.FirstName+" согласился стрельнуть сигарету", h.RequesterCtx.Account.ChatId, false)
 	return restoreCreatorResponse(c.CurrentResponse, h.Smoke)
 }
