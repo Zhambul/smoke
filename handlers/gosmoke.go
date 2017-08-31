@@ -68,7 +68,7 @@ type CancelDialog struct {
 
 func (h *CancelDialog) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
-	return restoreCreatorResponse(c.CurrentResponse, h.Smoke)
+	return restoreCreatorResponse(c.CurrentResponse, h.Smoke, c.BotAccount.ChatId)
 }
 
 type GoSmokeGroupHandler struct {
@@ -81,7 +81,7 @@ func (h *GoSmokeGroupHandler) Handle(c *bot.Context) *bot.Response {
 
 	r := c.CurrentResponse
 	r.ClearButtons()
-	setCreatorButtons(r, s)
+	setCreatorButtons(r, s, c.BotAccount.ChatId)
 
 	s.SCs[c.BotAccount.ChatId].PostResponse = r
 
@@ -132,7 +132,7 @@ func (h *ChangeTimeHandlerEnd) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
 	h.Smoke.ChangeTime(h.min, c.BotAccount)
 	r := h.Smoke.CreatorSC.PostResponse
-	return restoreCreatorResponse(r, h.Smoke)
+	return restoreCreatorResponse(r, h.Smoke, c.BotAccount.ChatId)
 }
 
 type CancelSmokeHandlerStart struct {
@@ -228,5 +228,5 @@ func (h *AnswerToCigaHandler) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
 	go h.Smoke.NotifyOne(h.RequesterCtx.Account.FirstName+" искренне благодарен", c.BotAccount.ChatId, true)
 	go h.Smoke.NotifyOne(c.BotAccount.FirstName+" согласился стрельнуть сигарету", h.RequesterCtx.Account.ChatId, false)
-	return restoreCreatorResponse(c.CurrentResponse, h.Smoke)
+	return restoreCreatorResponse(c.CurrentResponse, h.Smoke, c.BotAccount.ChatId)
 }

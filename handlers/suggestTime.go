@@ -69,5 +69,5 @@ func (h *SuggestTimeHandlerApproved) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.SetAnswer(h.Suggester, true)
 	//change time
 	h.Smoke.ChangeTime(h.min, h.Suggester)
-	return restoreCreatorResponse(c.CurrentResponse, h.Smoke)
+	return restoreCreatorResponse(c.CurrentResponse, h.Smoke, c.BotAccount.ChatId)
 }

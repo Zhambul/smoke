@@ -34,9 +34,10 @@ func setYesNoButtons(r *bot.Response, yesHandler bot.Handler, noHandler bot.Hand
 		})
 }
 
-func setCreatorButtons(r *bot.Response, s *smoke.Smoke) {
+func setCreatorButtons(r *bot.Response, s *smoke.Smoke, chatId int) {
 	r.AddButtonString("Изменить время", &ChangeTimeHandlerStart{s})
 	r.AddButtonString("Отменить", &CancelSmokeHandlerStart{s})
+	r.AddButtonString("Попросить стрельнуть", &AskForCigaHandler{Smoke: s, RequesterCtx: s.SCs[chatId]})
 	r.ReplyHandler = &ReplyHandler{s}
 }
 
@@ -57,9 +58,9 @@ func restoreRegularResponse(r *bot.Response, s *smoke.Smoke, chatId int) *bot.Re
 	return r
 }
 
-func restoreCreatorResponse(r *bot.Response, s *smoke.Smoke) *bot.Response {
+func restoreCreatorResponse(r *bot.Response, s *smoke.Smoke, chatId int) *bot.Response {
 	r.Text = s.Format()
 	r.ClearButtons()
-	setCreatorButtons(r, s)
+	setCreatorButtons(r, s, chatId)
 	return r
 }
