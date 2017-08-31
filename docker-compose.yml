@@ -13,6 +13,6 @@ services:
   postgres:
     image: postgres
     volumes:
-      - ~/qwe/data:/var/lib/postgresql/data
+      - /Users/zhambyl/qwe/data:/var/lib/postgresql/data
     env_file:
           - conf.env
