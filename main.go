@@ -60,7 +60,7 @@ func (h *ShareGroupInlineHandler) Handle(c *bot.Context) *bot.InlineAnswer {
 	a.Description = "Нажмите сюда, чтобы поделиться группой"
 	a.Button = &bot.Button{
 		Text: "Присоедениться",
-		URL:  "https://telegram.me/jumblu_bot?start=" + g.UUID,
+		URL:  "https://telegram.me/" + os.Getenv("BOT_NAME") + "?start=" + g.UUID,
 	}
 	log.Println("ShareGroupInlineHandler END")
 	return a

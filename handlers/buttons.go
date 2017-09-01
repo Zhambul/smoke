@@ -24,14 +24,16 @@ func timeButton(min int, getHandler func(min int) bot.Handler) *bot.Button {
 }
 
 func setYesNoButtons(r *bot.Response, yesHandler bot.Handler, noHandler bot.Handler) {
-	r.AddButtonRow(&bot.Button{
-		Text:    "Да",
-		Handler: yesHandler,
-	},
+	r.AddButtonRow(
+		&bot.Button{
+			Text:    "Да",
+			Handler: yesHandler,
+		},
 		&bot.Button{
 			Text:    "Нет",
 			Handler: noHandler,
-		})
+		},
+	)
 }
 
 func setCreatorButtons(r *bot.Response, s *smoke.Smoke, chatId int) {
@@ -42,10 +44,13 @@ func setCreatorButtons(r *bot.Response, s *smoke.Smoke, chatId int) {
 }
 
 func setRegularButtons(r *bot.Response, s *smoke.Smoke, chatId int) {
-	a := &AnswerHandler{
-		Smoke: s,
-	}
-	setYesNoButtons(r, a, a)
+	setYesNoButtons(r, &AnswerHandler{
+		Smoke:  s,
+		answer: true,
+	}, &AnswerHandler{
+		Smoke:  s,
+		answer: false,
+	})
 	r.AddButtonString("Попросить стрельнуть", &AskForCigaHandler{Smoke: s, RequesterCtx: s.SCs[chatId]})
 	r.AddButtonString("Предложить другое время", &SuggestTimeHandlerStart{s})
 	r.ReplyHandler = &ReplyHandler{s}

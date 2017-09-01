@@ -6,7 +6,6 @@ import (
 	"smoke3/domain"
 	"smoke3/smoke"
 	"smoke3/util"
-	"strings"
 )
 
 type GoSmokeHandler struct {
@@ -165,15 +164,12 @@ type CancelSmokeHandlerCancel struct {
 }
 
 type AnswerHandler struct {
-	Yes   *bot.Button
-	No    *bot.Button
-	Smoke *smoke.Smoke
+	Smoke  *smoke.Smoke
+	answer bool
 }
 
 func (h *AnswerHandler) Handle(c *bot.Context) *bot.Response {
-	answer := c.CurrentResponse.ClickedButton.Text
-	answer = strings.TrimSpace(answer)
-	h.Smoke.SetAnswer(c.BotAccount, answer == "Да")
+	h.Smoke.SetAnswer(c.BotAccount, h.answer)
 	return nil
 }
 
@@ -213,8 +209,9 @@ func askSmokersForCiga(h *AskForCigaHandler) {
 			continue
 		}
 		h.Smoke.LockUserUpdate(util.ToBotAccount(sc.Account))
-		go h.Smoke.AskOne(h.RequesterCtx.Account.FirstName+" просит стрельнуть сигарету", options, sc)
-		go h.Smoke.NotifyOne("!", sc.Account.ChatId, true)
+		msg := h.RequesterCtx.Account.FirstName + " просит стрельнуть сигарету"
+		go h.Smoke.AskOne(msg, options, sc)
+		go h.Smoke.NotifyOne(msg, sc.Account.ChatId, true)
 	}
 
 }

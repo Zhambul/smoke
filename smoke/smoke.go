@@ -127,7 +127,7 @@ func (s *Smoke) ChangeTime(min int, acc *bot.BotAccount) {
 	log.Println("Smoke::ChangeTime END")
 }
 
-func (s *Smoke) Cancel(notify bool) {
+func (s *Smoke) Cancel(manual bool) {
 	log.Println("Smoke::Cancel START")
 	log.Println("Smoke::lock")
 	s.lock.Lock()
@@ -143,7 +143,7 @@ func (s *Smoke) Cancel(notify bool) {
 		go sc.Context.DeleteResponse(sc.PostResponse)
 	}
 
-	if notify {
+	if manual {
 		go s.updateWithNotify("*"+s.CreatorSC.Account.FirstName+"* отменил",
 			s.CreatorSC.Account.ChatId)
 	}
