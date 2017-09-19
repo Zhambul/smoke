@@ -63,6 +63,13 @@ func restoreRegularResponse(r *bot.Response, s *smoke.Smoke, chatId int) *bot.Re
 	return r
 }
 
+func restoreResponse(r *bot.Response, s *smoke.Smoke, chatId int) *bot.Response {
+	if s.CreatorSC.Account.ChatId == chatId {
+		return restoreCreatorResponse(r, s, chatId)
+	}
+	return restoreRegularResponse(r, s, chatId)
+}
+
 func restoreCreatorResponse(r *bot.Response, s *smoke.Smoke, chatId int) *bot.Response {
 	r.Text = s.Format()
 	r.ClearButtons()

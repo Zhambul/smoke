@@ -35,7 +35,7 @@ func (h *SuggestTimeHandlerEnd) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.UnlockUserUpdate(c.BotAccount)
 	go h.Smoke.NotifyOne("Предложение изменить на "+strconv.Itoa(h.min)+" минут отправлено", c.BotAccount.ChatId, true)
 	go askCreator(h, c)
-	return restoreRegularResponse(c.CurrentResponse, h.Smoke, c.BotAccount.ChatId)
+	return restoreResponse(c.CurrentResponse, h.Smoke, c.BotAccount.ChatId)
 }
 
 func askCreator(h *SuggestTimeHandlerEnd, c *bot.Context) {
@@ -69,5 +69,5 @@ func (h *SuggestTimeHandlerApproved) Handle(c *bot.Context) *bot.Response {
 	h.Smoke.SetAnswer(h.Suggester, true)
 	//change time
 	h.Smoke.ChangeTime(h.min, h.Suggester)
-	return restoreCreatorResponse(c.CurrentResponse, h.Smoke, c.BotAccount.ChatId)
+	return restoreResponse(c.CurrentResponse, h.Smoke, c.BotAccount.ChatId)
 }
